@@ -7,7 +7,7 @@ import React, { useState, useEffect } from "react";
 import { Appointment, AppointmentStatus } from "./types";
 import { SupplierForm } from "./components/SupplierForm";
 import { ManagerDashboard } from "./components/ManagerDashboard";
-import { db } from "./lib/firebase";
+import { db, handleFirestoreError, OperationType } from "./lib/firebase";
 import { collection, onSnapshot, doc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { Truck, Users, LayoutDashboard, Calendar, HelpCircle, Shield, FileText, LogOut } from "lucide-react";
 import { Login, LoggedInUser } from "./components/Login";
@@ -42,47 +42,8 @@ export default function App() {
     localStorage.removeItem("bc_session");
   };
 
-  // Load appointments from Firestore in realtime with local cache fallbacks
+  // Load appointments from firestore in realtime
   useEffect(() => {
-    // One-time deletion of seed data when the application initializes from Zero
-    const seedIds = [
-      "BC-2026-0001",
-      "BC-2026-0002",
-      "BC-2026-0003",
-      "BC-2026-0004",
-      "BC-2026-0005",
-      "BC-2026-0006",
-      "BC-2026-0007",
-      "BC-2026-0008"
-    ];
-    seedIds.forEach(async (id) => {
-      try {
-        await deleteDoc(doc(db, "appointments", id));
-      } catch (e) {
-        console.warn(`Error deleting seed document ${id}:`, e);
-      }
-    });
-
-    // Reset sequence if it is currently set to the default seed sequence count of "8" or if not present
-    const currentSeq = localStorage.getItem("bc_seq");
-    if (!currentSeq || currentSeq === "8") {
-      localStorage.setItem("bc_seq", "0");
-    }
-
-    // Clear local storage cache from previous runs to avoid showing stale seed appointments
-    const cachedData = localStorage.getItem("bc_appointments");
-    if (cachedData) {
-      try {
-        const parsed = JSON.parse(cachedData) as Appointment[];
-        const hasSeeds = parsed.some(app => seedIds.includes(app.id) || app.createdBy === "Sistema (Seeding)");
-        if (hasSeeds) {
-          localStorage.removeItem("bc_appointments");
-        }
-      } catch (e) {
-        localStorage.removeItem("bc_appointments");
-      }
-    }
-
     let unsubscribe: () => void = () => {};
     try {
       unsubscribe = onSnapshot(
@@ -91,10 +52,7 @@ export default function App() {
           const list: Appointment[] = [];
           snapshot.forEach((doc) => {
             const data = doc.data() as Appointment;
-            // Filter out any seed documents that might be in the database or currently deleting
-            if (!seedIds.includes(data.id) && data.createdBy !== "Sistema (Seeding)") {
-              list.push(data);
-            }
+            list.push(data);
           });
           
           // Sort list by date and then timeslot
@@ -109,12 +67,17 @@ export default function App() {
           if (cached) {
             try {
               const parsed = JSON.parse(cached) as Appointment[];
-              setAppointments(parsed.filter(app => !seedIds.includes(app.id) && app.createdBy !== "Sistema (Seeding)"));
+              setAppointments(parsed);
             } catch (e) {
               setAppointments([]);
             }
           } else {
             setAppointments([]);
+          }
+          try {
+            handleFirestoreError(error, OperationType.LIST, "appointments");
+          } catch (e) {
+            console.error(e);
           }
         }
       );
@@ -124,8 +87,8 @@ export default function App() {
       if (cached) {
         try {
           const parsed = JSON.parse(cached) as Appointment[];
-          setAppointments(parsed.filter(app => !seedIds.includes(app.id) && app.createdBy !== "Sistema (Seeding)"));
-        } catch (e) {
+          setAppointments(parsed);
+        } catch (err) {
           setAppointments([]);
         }
       }
@@ -145,6 +108,11 @@ export default function App() {
       await setDoc(doc(db, "appointments", newApp.id), newApp);
     } catch (error) {
       console.warn("Firebase upload delayed. Local cache saved.", error);
+      try {
+        handleFirestoreError(error, OperationType.CREATE, `appointments/${newApp.id}`);
+      } catch (e) {
+        console.error(e);
+      }
     }
   };
 
@@ -164,6 +132,11 @@ export default function App() {
       await updateDoc(docRef, { status: newStatus });
     } catch (error) {
       console.warn("Firestore update postponed. Local state synchronized.", error);
+      try {
+        handleFirestoreError(error, OperationType.UPDATE, `appointments/${id}`);
+      } catch (e) {
+        console.error(e);
+      }
     }
   };
 
@@ -178,6 +151,11 @@ export default function App() {
       await deleteDoc(docRef);
     } catch (error) {
       console.warn("Firestore delete postponed. Local state synchronized.", error);
+      try {
+        handleFirestoreError(error, OperationType.DELETE, `appointments/${id}`);
+      } catch (e) {
+        console.error(e);
+      }
     }
   };
 

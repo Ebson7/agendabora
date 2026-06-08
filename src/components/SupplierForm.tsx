@@ -57,6 +57,27 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
     setInvoiceNumbers(invoiceNumbers.filter((n) => n !== num));
   };
 
+  const handleCargoValueChange = (val: string) => {
+    const digits = val.replace(/\D/g, "");
+    if (!digits) {
+      setCargoValue("");
+      return;
+    }
+    
+    const numberValue = parseInt(digits, 10);
+    if (isNaN(numberValue)) {
+      setCargoValue("");
+      return;
+    }
+    
+    const cents = (numberValue / 100).toFixed(2);
+    const parts = cents.split(".");
+    const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    const decimalPart = parts[1];
+    
+    setCargoValue(`${integerPart},${decimalPart}`);
+  };
+
   // UI States
   const [dateError, setDateError] = useState("");
   const [activeSlots, setActiveSlots] = useState<{ slot: string; remaining: number }[]>([]);
@@ -176,8 +197,20 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
     }
 
     // Generation of standard dynamic sequence protocol: BC-YYYY-NNNN
-    const lastSeq = localStorage.getItem("bc_seq") || "0";
-    const nextSeq = parseInt(lastSeq, 10) + 1;
+    // Calculated robustly by scanning the highest sequence currently present in the synchronized state
+    let maxSeq = 0;
+    appointments.forEach((app) => {
+      const match = app.id.match(/^BC-\d{4}-(\d+)/);
+      if (match) {
+        const seqNum = parseInt(match[1], 10);
+        if (seqNum > maxSeq) {
+          maxSeq = seqNum;
+        }
+      }
+    });
+    const nextSeq = maxSeq + 1;
+
+    // Save as local fallback just in case
     localStorage.setItem("bc_seq", nextSeq.toString());
 
     const chosenYear = date.substring(0, 4);
@@ -210,7 +243,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
       weight: parseFloat(weight) || 0,
       invoiceNumber: currentList.join(", ") || undefined,
       invoiceNumbers: currentList,
-      cargoValue: cargoValue.trim() ? parseFloat(cargoValue) : undefined,
+      cargoValue: cargoValue.trim() ? parseFloat(cargoValue.replace(/\./g, "").replace(",", ".")) : undefined,
       notes: notes.trim() || undefined,
       status: AppointmentStatus.Aguardando,
       createdBy: createdBy.trim(),
@@ -715,13 +748,11 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                     <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-mono font-bold">R$</span>
                     <input
                       id="cargo-value-input"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="Ex: 15450.80"
+                      type="text"
+                      placeholder="Ex: 15.450,80"
                       value={cargoValue}
-                      onChange={(e) => setCargoValue(e.target.value)}
-                      className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] rounded-lg py-2 pl-9 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors"
+                      onChange={(e) => handleCargoValueChange(e.target.value)}
+                      className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] rounded-lg py-2 pl-9 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors font-mono"
                     />
                   </div>
                 </div>

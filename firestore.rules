@@ -31,8 +31,8 @@ service cloud.firestore {
           && data.date is string && data.date.size() == 10
           && data.timeSlot is string && data.timeSlot.size() <= 30
           && data.productType is string && data.productType.size() <= 30
-          && data.volume is number && data.volume >= 0
-          && data.pallets is number && data.pallets >= 0
+          && data.volume is int && data.volume >= 0
+          && data.pallets is int && data.pallets >= 0
           && data.weight is number && data.weight >= 0
           && (data.status == 'AGUARDANDO CONFIRMAÇÃO' || data.status == 'CONFIRMADO' || data.status == 'EM RECEBIMENTO' || data.status == 'CONCLUÍDO' || data.status == 'CANCELADO')
           && data.createdBy is string && data.createdBy.size() <= 128

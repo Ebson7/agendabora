@@ -861,10 +861,6 @@ export function ManagerDashboard({
                           <button
                             key={elem.status}
                             onClick={() => {
-                              if ((elem.status === AppointmentStatus.EmRecebimento || elem.status === AppointmentStatus.Concluido) && (!driverInput.trim() || !plateInput.trim())) {
-                                alert("⚠️ Operação Recusada!\n\nPara atualizar o status para EM RECEBIMENTO ou CONCLUÍDO, é obrigatório preencher o Nome do Motorista e a Placa do Veículo.");
-                                return;
-                              }
                               onUpdateStatus(selectedApp.id, elem.status, driverInput.trim(), plateInput.trim());
                               setSelectedApp(null);
                             }}

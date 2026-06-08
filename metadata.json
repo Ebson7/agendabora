@@ -1,0 +1,6 @@
+{
+  "name": "Agendamento de Cargas CD Boracéia",
+  "description": "Sistema completo para agendamento de recebimento de cargas de fornecedores do Centro de Distribuição de Boracéia, com controle de lotação das docas e painel gerencial.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

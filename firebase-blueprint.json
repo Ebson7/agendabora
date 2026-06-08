@@ -1,0 +1,97 @@
+{
+  "entities": {
+    "appointment": {
+      "title": "Appointment",
+      "description": "Model of a cargo delivery scheduling slot for CD Boracéia",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Primary generated protocol like BC-YYYY-NNNN"
+        },
+        "supplierName": {
+          "type": "string",
+          "description": "Supplier name / Corporate social name"
+        },
+        "cnpj": {
+          "type": "string",
+          "description": "Supplier CNPJ code"
+        },
+        "driverName": {
+          "type": "string",
+          "description": "Driver name"
+        },
+        "plate": {
+          "type": "string",
+          "description": "Vehicle vehicle plate code"
+        },
+        "vehicleType": {
+          "type": "string",
+          "description": "Truck, VUC, Carreta or Van"
+        },
+        "date": {
+          "type": "string",
+          "description": "Date format YYYY-MM-DD"
+        },
+        "timeSlot": {
+          "type": "string",
+          "description": "Hour range window like 08:00 - 09:00"
+        },
+        "productType": {
+          "type": "string",
+          "description": "Balas, Chocolates, Biscoitos, Salgadinhos, Bebidas, Outros"
+        },
+        "volume": {
+          "type": "integer",
+          "description": "Estimated volume in boxes"
+        },
+        "pallets": {
+          "type": "integer",
+          "description": "Estimated count of standard pallets"
+        },
+        "weight": {
+          "type": "number",
+          "description": "Weight in kilograms"
+        },
+        "invoiceNumber": {
+          "type": "string",
+          "description": "Associated Invoice Number"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Cargo observation constraints"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status enum like AGUARDANDO CONFIRMAÇÃO"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO date string"
+        }
+      },
+      "required": [
+        "id",
+        "supplierName",
+        "cnpj",
+        "driverName",
+        "plate",
+        "vehicleType",
+        "date",
+        "timeSlot",
+        "productType",
+        "volume",
+        "pallets",
+        "weight",
+        "status",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "appointments/{appointmentId}": {
+      "schema": "appointment",
+      "description": "Cargo scheduling reservations registered by providers or admins"
+    }
+  }
+}

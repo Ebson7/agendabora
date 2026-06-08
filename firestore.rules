@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net Guard
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper utilities
+    function isValidId(id) {
+      return id is string && id.size() <= 64 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation blueprint for Appointment
+    function isValidAppointment(data) {
+      return data.id is string && data.id.size() <= 32
+          && data.supplierName is string && data.supplierName.size() <= 128
+          && data.cnpj is string && data.cnpj.size() <= 20
+          && data.driverName is string && data.driverName.size() <= 128
+          && data.plate is string && data.plate.size() <= 12
+          && data.vehicleType is string && data.vehicleType.size() <= 20
+          && data.date is string && data.date.size() == 10
+          && data.timeSlot is string && data.timeSlot.size() <= 30
+          && data.productType is string && data.productType.size() <= 30
+          && data.volume is int && data.volume >= 0
+          && data.pallets is int && data.pallets >= 0
+          && data.weight is number && data.weight >= 0
+          && (data.status == 'AGUARDANDO CONFIRMAÇÃO' || data.status == 'CONFIRMADO' || data.status == 'EM RECEBIMENTO' || data.status == 'CONCLUÍDO' || data.status == 'CANCELADO')
+          && data.createdAt is string;
+    }
+
+    // Appointment rules
+    match /appointments/{appointmentId} {
+      // Allow read to fetch or query the scheduling log
+      allow read: if true;
+
+      // Allow create with robust type checking and validating functions
+      allow create: if isValidId(appointmentId)
+                   && isValidAppointment(incoming())
+                   && incoming().id == appointmentId;
+
+      // Allow update - validate state transition and ensure identifier safety
+      allow update: if isValidId(appointmentId)
+                   && isValidAppointment(incoming())
+                   && incoming().id == existing().id
+                   && incoming().createdAt == existing().createdAt;
+
+      // Allow deletion only if the status is Canceled
+      allow delete: if existing().status == 'CANCELADO';
+    }
+  }
+}

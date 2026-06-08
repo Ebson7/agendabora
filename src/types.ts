@@ -41,6 +41,8 @@ export interface Appointment {
   pallets: number; // estimated pallets count
   weight: number; // in kg
   invoiceNumber?: string;
+  invoiceNumbers?: string[];
+  cargoValue?: number;
   notes?: string;
   status: AppointmentStatus;
   createdBy: string; // Name of the person scheduling the appointment

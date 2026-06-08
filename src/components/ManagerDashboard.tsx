@@ -716,13 +716,49 @@ export function ManagerDashboard({
 
               <div className="p-3 bg-[#0f1419] text-xs rounded border border-slate-850">
                 <span className="text-slate-500 block font-medium mb-1 uppercase font-mono text-[10px]">Especificação da Carga</span>
-                <div className="flex items-center justify-between text-slate-300 font-mono gap-2 flex-wrap">
+                <div className="flex items-center justify-between text-slate-300 font-mono gap-2 flex-wrap mb-2">
                   <span>Família: <strong className="text-white">{selectedApp.productType}</strong></span>
                   <span>Vol: <strong className="text-white">{selectedApp.volume} cx</strong></span>
                   <span>Paletes: <strong className="text-[#2563eb]">{selectedApp.pallets || 0}</strong></span>
                   <span>Peso: <strong className="text-white">{selectedApp.weight.toLocaleString("pt-BR")} kg</strong></span>
                 </div>
+                {selectedApp.cargoValue !== undefined && (
+                  <div className="border-t border-slate-800/85 pt-2 mt-2 flex items-center justify-between">
+                    <span className="text-[10px] text-slate-500 uppercase font-mono">Valor Estimado da Carga:</span>
+                    <strong className="text-[#51cf66] font-semibold">{selectedApp.cargoValue.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</strong>
+                  </div>
+                )}
               </div>
+
+              {((selectedApp.invoiceNumbers && selectedApp.invoiceNumbers.length > 0) || selectedApp.invoiceNumber || selectedApp.notes) && (
+                <div className="p-3 bg-[#0f1419] text-xs rounded border border-slate-850 space-y-2">
+                  {((selectedApp.invoiceNumbers && selectedApp.invoiceNumbers.length > 0) || selectedApp.invoiceNumber) && (
+                    <div>
+                      <span className="text-slate-500 block font-medium uppercase font-mono text-[10px] mb-1">Notas Fiscais (NF)</span>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {selectedApp.invoiceNumbers && selectedApp.invoiceNumbers.length > 0 ? (
+                          selectedApp.invoiceNumbers.map(n => (
+                            <span key={n} className="bg-slate-800 text-slate-300 text-[10px] font-mono font-semibold px-2 py-0.5 rounded border border-slate-700/80">
+                              {n}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="bg-slate-800 text-slate-300 text-[10px] font-mono font-semibold px-2 py-0.5 rounded border border-slate-700/80">
+                            {selectedApp.invoiceNumber}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedApp.notes && (
+                    <div className="border-t border-slate-800/85 pt-2 mt-2">
+                      <span className="text-slate-500 block font-medium uppercase font-mono text-[10px] mb-1">Observações Especiais</span>
+                      <p className="italic text-slate-300 leading-relaxed bg-[#1a2129]/30 p-2 rounded border border-slate-800">{selectedApp.notes}</p>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {isAdmin ? (
                 <>

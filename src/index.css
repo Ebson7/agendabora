@@ -5,8 +5,8 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   
-  --color-brand-orange: #ff6b35;
-  --color-brand-orange-hover: #fa5216;
+  --color-brand-blue: #2563eb;
+  --color-brand-blue-hover: #1d4ed8;
   --color-dark-bg: #0f1419;
   --color-dark-card: #1a2129;
   --color-dark-border: #2e3842;
@@ -33,5 +33,5 @@ body {
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-brand-orange);
+  background: var(--color-brand-blue);
 }

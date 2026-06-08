@@ -7,18 +7,82 @@ import React, { useState, useEffect } from "react";
 import { Appointment, AppointmentStatus } from "./types";
 import { SupplierForm } from "./components/SupplierForm";
 import { ManagerDashboard } from "./components/ManagerDashboard";
-import { generateSeedAppointments } from "./utils/seedData";
 import { db } from "./lib/firebase";
 import { collection, onSnapshot, doc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
-import { Truck, Users, LayoutDashboard, Calendar, HelpCircle, Shield, FileText } from "lucide-react";
+import { Truck, Users, LayoutDashboard, Calendar, HelpCircle, Shield, FileText, LogOut } from "lucide-react";
+import { Login, LoggedInUser } from "./components/Login";
 
 export default function App() {
   // Tabs: "supplier" (Agendar Carga) or "manager" (Painel do Gestor)
-  const [activeTab, setActiveTab] = useState<"supplier" | "manager">("supplier");
+  const [activeTab, setActiveTab] = useState<"supplier" | "manager">("manager");
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+
+  // Simple Auth state
+  const [currentUser, setCurrentUser] = useState<LoggedInUser | null>(() => {
+    const saved = localStorage.getItem("bc_session");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as LoggedInUser;
+        return parsed;
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  });
+
+  const handleLoginSuccess = (user: LoggedInUser) => {
+    setCurrentUser(user);
+    localStorage.setItem("bc_session", JSON.stringify(user));
+    setActiveTab("manager");
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem("bc_session");
+  };
 
   // Load appointments from Firestore in realtime with local cache fallbacks
   useEffect(() => {
+    // One-time deletion of seed data when the application initializes from Zero
+    const seedIds = [
+      "BC-2026-0001",
+      "BC-2026-0002",
+      "BC-2026-0003",
+      "BC-2026-0004",
+      "BC-2026-0005",
+      "BC-2026-0006",
+      "BC-2026-0007",
+      "BC-2026-0008"
+    ];
+    seedIds.forEach(async (id) => {
+      try {
+        await deleteDoc(doc(db, "appointments", id));
+      } catch (e) {
+        console.warn(`Error deleting seed document ${id}:`, e);
+      }
+    });
+
+    // Reset sequence if it is currently set to the default seed sequence count of "8" or if not present
+    const currentSeq = localStorage.getItem("bc_seq");
+    if (!currentSeq || currentSeq === "8") {
+      localStorage.setItem("bc_seq", "0");
+    }
+
+    // Clear local storage cache from previous runs to avoid showing stale seed appointments
+    const cachedData = localStorage.getItem("bc_appointments");
+    if (cachedData) {
+      try {
+        const parsed = JSON.parse(cachedData) as Appointment[];
+        const hasSeeds = parsed.some(app => seedIds.includes(app.id) || app.createdBy === "Sistema (Seeding)");
+        if (hasSeeds) {
+          localStorage.removeItem("bc_appointments");
+        }
+      } catch (e) {
+        localStorage.removeItem("bc_appointments");
+      }
+    }
+
     let unsubscribe: () => void = () => {};
     try {
       unsubscribe = onSnapshot(
@@ -26,42 +90,31 @@ export default function App() {
         (snapshot) => {
           const list: Appointment[] = [];
           snapshot.forEach((doc) => {
-            list.push(doc.data() as Appointment);
+            const data = doc.data() as Appointment;
+            // Filter out any seed documents that might be in the database or currently deleting
+            if (!seedIds.includes(data.id) && data.createdBy !== "Sistema (Seeding)") {
+              list.push(data);
+            }
           });
           
           // Sort list by date and then timeslot
           list.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
           
-          if (list.length > 0) {
-            setAppointments(list);
-            localStorage.setItem("bc_appointments", JSON.stringify(list));
-          } else {
-            // First run on blank Firebase - upload our high-quality seed data
-            const seeds = generateSeedAppointments();
-            seeds.forEach(async (seed) => {
-              try {
-                await setDoc(doc(db, "appointments", seed.id), seed);
-              } catch (e) {
-                console.warn("Could not save seed to firestore: ", e);
-              }
-            });
-            setAppointments(seeds);
-            localStorage.setItem("bc_appointments", JSON.stringify(seeds));
-          }
+          setAppointments(list);
+          localStorage.setItem("bc_appointments", JSON.stringify(list));
         },
         (error) => {
           console.warn("Firestore access error, loading local cache fallback:", error);
           const cached = localStorage.getItem("bc_appointments");
           if (cached) {
             try {
-              setAppointments(JSON.parse(cached));
+              const parsed = JSON.parse(cached) as Appointment[];
+              setAppointments(parsed.filter(app => !seedIds.includes(app.id) && app.createdBy !== "Sistema (Seeding)"));
             } catch (e) {
-              const seeds = generateSeedAppointments();
-              setAppointments(seeds);
+              setAppointments([]);
             }
           } else {
-            const seeds = generateSeedAppointments();
-            setAppointments(seeds);
+            setAppointments([]);
           }
         }
       );
@@ -69,13 +122,13 @@ export default function App() {
       console.warn("Realtime Firestore listener setup failed:", e);
       const cached = localStorage.getItem("bc_appointments");
       if (cached) {
-        setAppointments(JSON.parse(cached));
+        try {
+          const parsed = JSON.parse(cached) as Appointment[];
+          setAppointments(parsed.filter(app => !seedIds.includes(app.id) && app.createdBy !== "Sistema (Seeding)"));
+        } catch (e) {
+          setAppointments([]);
+        }
       }
-    }
-
-    // Sequence start marker if not already present
-    if (!localStorage.getItem("bc_seq")) {
-      localStorage.setItem("bc_seq", "8");
     }
 
     return () => unsubscribe();
@@ -128,6 +181,10 @@ export default function App() {
     }
   };
 
+  if (!currentUser) {
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-[#0f1419] text-slate-100 antialiased font-sans filter-none print:bg-white print:text-black">
       {/* Brand Header / Banner */}
@@ -136,12 +193,12 @@ export default function App() {
           
           {/* Logo / Title */}
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-[#ff6b35] flex items-center justify-center text-white shadow-md shadow-[#ff6b35]/20 shrink-0">
+            <div className="h-10 w-10 rounded-lg bg-[#2563eb] flex items-center justify-center text-white shadow-md shadow-[#2563eb]/20 shrink-0">
               <Truck className="w-6 h-6 animate-pulse" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs bg-[#ff6b35]/15 text-[#ff6b35] font-mono font-bold tracking-wider rounded px-1.5 py-0.5">FILIAL BORACÉIA</span>
+                <span className="text-xs bg-[#2563eb]/15 text-[#2563eb] font-mono font-bold tracking-wider rounded px-1.5 py-0.5">FILIAL BORACÉIA</span>
                 <span className="text-xs text-slate-400">•</span>
                 <span className="text-xs text-[#51cf66] font-semibold flex items-center gap-1">
                   <span className="w-1.5 h-1.5 bg-[#51cf66] rounded-full animate-ping"></span>
@@ -149,37 +206,66 @@ export default function App() {
                 </span>
               </div>
               <h1 className="text-lg font-bold text-white tracking-tight leading-tight">
-                MARSIL ALIMENTOS <span className="font-light text-slate-400">| Recebimento de Cargas</span>
+                MARSIL ATACADISTA <span className="font-light text-slate-400">| Recebimento de Cargas</span>
               </h1>
             </div>
           </div>
 
-          {/* Interactive Navigation Tabs */}
-          <div className="flex items-center bg-[#0f1419] p-1 rounded-lg border border-slate-800">
-            <button
-              id="tab-button-supplier"
-              onClick={() => setActiveTab("supplier")}
-              className={`px-4 py-2 rounded-md text-xs font-semibold tracking-wide flex items-center gap-2 transition cursor-pointer ${
-                activeTab === "supplier"
-                  ? "bg-[#ff6b35] text-white shadow-md shadow-[#ff6b35]/10"
-                  : "text-slate-400 hover:text-white hover:bg-slate-850"
-              }`}
-            >
-              <FileText className="w-4 h-4" />
-              📦 AGENDAR CARGA
-            </button>
-            <button
-              id="tab-button-manager"
-              onClick={() => setActiveTab("manager")}
-              className={`px-4 py-2 rounded-md text-xs font-semibold tracking-wide flex items-center gap-2 transition cursor-pointer ${
-                activeTab === "manager"
-                  ? "bg-[#ff6b35] text-white shadow-md shadow-[#ff6b35]/10"
-                  : "text-slate-400 hover:text-white hover:bg-slate-850"
-              }`}
-            >
-              <LayoutDashboard className="w-4 h-4" />
-              📋 PAINEL DO GESTOR
-            </button>
+          {/* Interactive Navigation Tabs & User Sessions */}
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center bg-[#0f1419] p-1 rounded-lg border border-slate-800">
+              {currentUser.role === "admin" ? (
+                <>
+                  <button
+                    id="tab-button-supplier"
+                    onClick={() => setActiveTab("supplier")}
+                    className={`px-4 py-2 rounded-md text-xs font-semibold tracking-wide flex items-center gap-2 transition cursor-pointer ${
+                      activeTab === "supplier"
+                        ? "bg-[#2563eb] text-white shadow-md shadow-[#2563eb]/10"
+                        : "text-slate-400 hover:text-white hover:bg-slate-850"
+                    }`}
+                  >
+                    <FileText className="w-4 h-4" />
+                    📦 AGENDAR CARGA
+                  </button>
+                  <button
+                    id="tab-button-manager"
+                    onClick={() => setActiveTab("manager")}
+                    className={`px-4 py-2 rounded-md text-xs font-semibold tracking-wide flex items-center gap-2 transition cursor-pointer ${
+                      activeTab === "manager"
+                        ? "bg-[#2563eb] text-white shadow-md shadow-[#2563eb]/10"
+                        : "text-slate-400 hover:text-white hover:bg-slate-850"
+                    }`}
+                  >
+                    <LayoutDashboard className="w-4 h-4" />
+                    📋 PAINEL DO GESTOR
+                  </button>
+                </>
+              ) : (
+                <div className="px-4 py-1.5 bg-slate-800/60 rounded-md text-xs font-semibold tracking-wide flex items-center gap-2 text-[#2563eb] border border-[#2563eb]/20">
+                  <LayoutDashboard className="w-4 h-4" />
+                  📋 AGENDA DE CARGAS (CONSULTA)
+                </div>
+              )}
+            </div>
+
+            {/* Profile info and Log Out */}
+            <div className="flex items-center gap-2.5">
+              <div className="text-right hidden sm:block">
+                <span className="text-[10px] text-slate-500 font-mono block leading-none">Logado como</span>
+                <span className="text-xs font-semibold text-white mt-1 block">
+                  {currentUser.displayName}
+                </span>
+              </div>
+              <button
+                id="btn-app-logout"
+                onClick={handleLogout}
+                className="p-2 bg-slate-800 hover:bg-red-500/10 text-slate-400 hover:text-red-400 rounded-lg transition-colors border border-slate-700/60 cursor-pointer"
+                title="Sair do CD"
+              >
+                <LogOut className="w-4.5 h-4.5" />
+              </button>
+            </div>
           </div>
 
         </div>
@@ -191,7 +277,7 @@ export default function App() {
         {/* Quick Operations Summary banner */}
         <div className="bg-[#1c2e36]/30 border border-teal-500/20 text-slate-350 py-3 px-4 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6 text-xs print:hidden">
           <div className="flex items-center gap-2">
-            <span className="bg-[#ff6b35] text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">Regras CD</span>
+            <span className="bg-[#2563eb] text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">Regras CD</span>
             <p>
               Janelas de 1 hora (06h às 18h). Limite de <strong>2 agendamentos por janela</strong> (2 docas). Permite agendamentos no próprio dia.
             </p>
@@ -203,7 +289,7 @@ export default function App() {
         </div>
 
         {/* View Switcher based on tab state */}
-        {activeTab === "supplier" ? (
+        {activeTab === "supplier" && currentUser.role === "admin" ? (
           <div>
             <div className="mb-4">
               <h2 className="text-xl font-bold text-white font-sans tracking-tight">Solicitação de Horário para Descarga</h2>
@@ -214,10 +300,21 @@ export default function App() {
         ) : (
           <div>
             <div className="mb-4">
-              <h2 className="text-xl font-bold text-white font-sans tracking-tight">Controle Operacional de Recebimento</h2>
-              <p className="text-slate-400 text-xs mt-1">Acompanhe as entregas, valide docas ocupadas e marque cargas como recebidas de forma instantânea.</p>
+              <h2 className="text-xl font-bold text-white font-sans tracking-tight">
+                {currentUser.role === "admin" ? "Controle Operacional de Recebimento" : "Consulta de Janelas de Entrega"}
+              </h2>
+              <p className="text-slate-400 text-xs mt-1">
+                {currentUser.role === "admin"
+                  ? "Acompanhe as entregas, valide docas ocupadas e marque cargas como recebidas de forma instantânea."
+                  : "Acompanhe o cronograma de descargas planejadas para a unidade Marsil CD Boracéia (Modo de Consulta)."}
+              </p>
             </div>
-            <ManagerDashboard appointments={appointments} onUpdateStatus={handleUpdateStatus} onDeleteAppointment={handleDeleteAppointment} />
+            <ManagerDashboard
+              appointments={appointments}
+              onUpdateStatus={handleUpdateStatus}
+              onDeleteAppointment={handleDeleteAppointment}
+              isAdmin={currentUser.role === "admin"}
+            />
           </div>
         )}
 
@@ -226,7 +323,7 @@ export default function App() {
       {/* Custom footer indicating Firebase persistence and safety values */}
       <footer className="bg-[#1a2129] border-t border-slate-800 text-slate-500 text-center py-6 text-xs mt-auto print:hidden">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <p>© 2026 MarSil Alimentos Ltda — Filial CD Boracéia. Todos os direitos reservados.</p>
+          <p>© 2026 Marsil Atacadista — Filial CD Boracéia. Todos os direitos reservados.</p>
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5 text-emerald-400">
               <Shield className="w-3.5 h-3.5" />

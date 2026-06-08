@@ -221,14 +221,14 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
     <div id="supplier-scheduling-view" className="w-full max-w-4xl mx-auto py-4 px-1">
       {successAppointment ? (
         /* Recibo de Confirmação */
-        <div id="booking-receipt-box" className="bg-[#1a2129] border-2 border-[#ff6b35] rounded-xl p-8 shadow-2xl relative overflow-hidden animate-fade-in print:bg-white print:text-black print:border-none print:shadow-none">
+        <div id="booking-receipt-box" className="bg-[#1a2129] border-2 border-[#2563eb] rounded-xl p-8 shadow-2xl relative overflow-hidden animate-fade-in print:bg-white print:text-black print:border-none print:shadow-none">
           {/* Decorative stamp background */}
           <div className="absolute right-[-30px] bottom-[-20px] text-slate-800/10 font-bold text-9xl pointer-events-none select-none print:hidden">
             CD BC
           </div>
 
-          <div className="flex items-center gap-3 text-[#ff6b35] mb-6 print:text-[#fa5216]">
-            <div className="p-3 bg-[#ff6b35]/10 rounded-full print:bg-slate-100">
+          <div className="flex items-center gap-3 text-[#2563eb] mb-6 print:text-[#1d4ed8]">
+            <div className="p-3 bg-[#2563eb]/10 rounded-full print:bg-slate-100">
               <Check className="w-8 h-8" />
             </div>
             <div>
@@ -239,8 +239,16 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
 
           <div className="p-6 bg-[#0f1419] rounded-lg border border-slate-700/60 mb-6 print:border-slate-300 print:bg-slate-50">
             <span className="text-xs text-slate-500 font-mono tracking-wider block mb-1">CÓDIGO DE PROTOCOLO</span>
-            <span className="text-3xl font-mono font-bold text-[#ff6b35] tracking-widest block">{successAppointment.id}</span>
-            <div className="mt-2 text-xs text-[#fcc419] bg-[#fcc419]/10 py-1 px-2.5 rounded inline-flex items-center gap-1.5 print:border print:border-[#fcc419]">
+            <span className="text-3xl font-mono font-bold text-[#2563eb] tracking-widest block">{successAppointment.id}</span>
+            <div className="mt-2 text-xs text-slate-400 font-mono flex flex-col gap-1 print:text-black">
+              <div>
+                <span>Local de Entrega:</span> <strong className="text-slate-250 font-semibold">CD Marsil Boracéia</strong>
+              </div>
+              <div>
+                <span>Endereço:</span> <strong className="text-slate-250 font-semibold">R. Terciliano Sgavioli, 671-721, Boracéia - SP, 17270-000</strong>
+              </div>
+            </div>
+            <div className="mt-3 text-xs text-[#fcc419] bg-[#fcc419]/10 py-1 px-2.5 rounded inline-flex items-center gap-1.5 print:border print:border-[#fcc419]">
               <span className="w-2 h-2 rounded-full bg-[#fcc419] animate-pulse"></span>
               {successAppointment.status}
             </div>
@@ -289,7 +297,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
 
             <div>
               <p className="text-slate-400 text-xs print:text-slate-500">Responsável pelo Cadastro</p>
-              <p className="font-semibold text-[#ff6b35] print:text-black">{successAppointment.createdBy}</p>
+              <p className="font-semibold text-[#2563eb] print:text-black">{successAppointment.createdBy}</p>
             </div>
 
             {successAppointment.invoiceNumber && (
@@ -306,9 +314,11 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
             )}
           </div>
 
-          <div className="p-4 bg-slate-800/40 border-l-4 border-amber-500 text-xs text-slate-400 rounded-r mb-8 leading-relaxed print:hidden">
-            <span className="font-bold text-slate-300 block mb-1">IMPORTANTE PARA A ENTREGA:</span>
-            O veículo deve apresentar-se na Portaria 1 (Rua das Palmeiras, s/n) com 20 minutos de antecedência. É obrigatório o uso de calçado fechado e colete refletivo por parte do motorista.
+          <div className="p-4 bg-slate-800/40 border-l-4 border-[#2563eb] text-xs text-slate-400 rounded-r mb-8 leading-relaxed print:bg-slate-50 print:text-black print:border-l-4 print:border-[#2563eb]">
+            <span className="font-bold text-slate-300 block mb-1 print:text-black">IMPLANTAÇÃO & ENDEREÇO DE DESCARGA CD MARSIL BORACÉIA:</span>
+            <span className="text-slate-200 font-semibold print:text-black">R. Terciliano Sgavioli, 671-721, Boracéia - SP, CEP: 17270-000</span>
+            <br />
+            O veículo deve apresentar-se no endereço acima com 20 minutos de antecedência. É obrigatório o uso de calçado fechado e colete refletivo por parte do motorista.
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 print:hidden">
@@ -316,7 +326,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
               id="btn-copy-receipt"
               type="button"
               onClick={handleCopyProtocol}
-              className="flex-1 bg-[#ff6b35] hover:bg-[#fa5216] text-white font-semibold py-3 px-5 rounded-lg flex items-center justify-center gap-2 transition duration-150 shadow-md active:scale-[0.98] cursor-pointer"
+              className="flex-1 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold py-3 px-5 rounded-lg flex items-center justify-center gap-2 transition duration-150 shadow-md active:scale-[0.98] cursor-pointer"
             >
               <Clipboard className="w-5 h-5" />
               {copied ? "Copiado!" : "Copiar Dados de Protocolo"}
@@ -343,16 +353,21 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
       ) : (
         /* Formulário de Agendamento */
         <div className="bg-[#1a2129] border border-slate-800 rounded-xl p-6 md:p-8 shadow-xl animate-fade-in">
-          <div className="flex items-center gap-2 mb-6 text-sm text-[#ff6b35] font-mono tracking-wider font-semibold border-b border-slate-800 pb-3">
-            <Package className="w-5 h-5 text-[#ff6b35]" />
-            SOLICITAÇÃO DE JANELA DE DESCARGA — MARSIL CD BORACÉIA
+          <div className="flex flex-col gap-1 mb-6 border-b border-slate-800 pb-3">
+            <div className="flex items-center gap-2 text-sm text-[#2563eb] font-mono tracking-wider font-semibold">
+              <Package className="w-5 h-5 text-[#2563eb]" />
+              SOLICITAÇÃO DE JANELA DE DESCARGA — MARSIL ATACADISTA CD BORACÉIA
+            </div>
+            <div className="text-[11px] text-slate-400 font-mono mt-1">
+              <strong>Unidade Boracéia:</strong> R. Terciliano Sgavioli, 671-721, Boracéia - SP, CEP: 17270-000
+            </div>
           </div>
 
           <form id="schedule-cargo-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Secao 1: Identificacao do Fornecedor */}
             <div>
               <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <span className="w-1.5 h-3.5 bg-[#ff6b35] rounded-full"></span>
+                <span className="w-1.5 h-3.5 bg-[#2563eb] rounded-full"></span>
                 1. Dados Corporativos do Fornecedor
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -369,7 +384,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                       placeholder="Ex: Marsil Distribuidora Alimentos S.A."
                       value={supplierName}
                       onChange={(e) => setSupplierName(e.target.value)}
-                      className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#ff6b35] focus:ring-1 focus:ring-[#ff6b35] rounded-lg py-2 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors"
+                      className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] rounded-lg py-2 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors"
                     />
                   </div>
                 </div>
@@ -387,7 +402,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                       placeholder="00.000.000/0000-00"
                       value={cnpj}
                       onChange={handleCnpjChange}
-                      className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#ff6b35] focus:ring-1 focus:ring-[#ff6b35] rounded-lg py-2 pl-10 pr-4 text-sm font-mono text-white placeholder-slate-500 focus:outline-none transition-colors"
+                      className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] rounded-lg py-2 pl-10 pr-4 text-sm font-mono text-white placeholder-slate-500 focus:outline-none transition-colors"
                     />
                   </div>
                 </div>
@@ -405,7 +420,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                       placeholder="Ex: Amanda Silva (Logística)"
                       value={createdBy}
                       onChange={(e) => setCreatedBy(e.target.value)}
-                      className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#ff6b35] focus:ring-1 focus:ring-[#ff6b35] rounded-lg py-2 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors"
+                      className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] rounded-lg py-2 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors"
                     />
                   </div>
                 </div>
@@ -415,7 +430,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
             {/* Secao 2: Dados do Transporte */}
             <div className="pt-2">
               <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <span className="w-1.5 h-3.5 bg-[#ff6b35] rounded-full"></span>
+                <span className="w-1.5 h-3.5 bg-[#2563eb] rounded-full"></span>
                 2. Informações de Transporte
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -432,7 +447,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                       placeholder="Nome do motorista para a portaria"
                       value={driverName}
                       onChange={(e) => setDriverName(e.target.value)}
-                      className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#ff6b35] focus:ring-1 focus:ring-[#ff6b35] rounded-lg py-2 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors"
+                      className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] rounded-lg py-2 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors"
                     />
                   </div>
                 </div>
@@ -450,7 +465,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                       placeholder="Ex: ABC1D23"
                       value={plate}
                       onChange={handlePlateChange}
-                      className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#ff6b35] focus:ring-1 focus:ring-[#ff6b35] rounded-lg py-2 pl-10 pr-4 text-sm font-mono text-white placeholder-slate-500 focus:outline-none transition-colors text-center"
+                      className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] rounded-lg py-2 pl-10 pr-4 text-sm font-mono text-white placeholder-slate-500 focus:outline-none transition-colors text-center"
                     />
                   </div>
                 </div>
@@ -463,7 +478,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                     id="vehicle-type-select"
                     value={vehicleType}
                     onChange={(e) => setVehicleType(e.target.value as VehicleType)}
-                    className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#ff6b35] focus:ring-1 focus:ring-[#ff6b35] rounded-lg py-2 px-3 text-sm text-white focus:outline-none transition-colors"
+                    className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] rounded-lg py-2 px-3 text-sm text-white focus:outline-none transition-colors"
                   >
                     <option value={VehicleType.Truck}>Truck (Até 14T)</option>
                     <option value={VehicleType.VUC}>VUC (Urbano)</option>
@@ -477,7 +492,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
             {/* Secao 3: Data e Janela Disponivel */}
             <div className="pt-2">
               <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <span className="w-1.5 h-3.5 bg-[#ff6b35] rounded-full"></span>
+                <span className="w-1.5 h-3.5 bg-[#2563eb] rounded-full"></span>
                 3. Data e Horário (Grade de Recibo)
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -495,7 +510,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                       max={maxDateStr}
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#ff6b35] focus:ring-1 focus:ring-[#ff6b35] rounded-lg py-2 pl-10 pr-4 text-sm text-white focus:outline-none transition-colors"
+                      className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] rounded-lg py-2 pl-10 pr-4 text-sm text-white focus:outline-none transition-colors"
                     />
                   </div>
                   {dateError ? (
@@ -522,7 +537,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                     disabled={!date || !!dateError}
                     value={timeSlot}
                     onChange={(e) => setTimeSlot(e.target.value)}
-                    className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#ff6b35] focus:ring-1 focus:ring-[#ff6b35] rounded-lg py-2 px-3 text-sm text-white focus:outline-none transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] rounded-lg py-2 px-3 text-sm text-white focus:outline-none transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <option value="">
                       {!date ? "Selecione uma data primeiro" : dateError ? "Data inválida ou bloqueada" : "Selecione a janela..."}
@@ -540,7 +555,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                   </select>
                   {date && !dateError && (
                     <div className="mt-2 p-2 bg-slate-800/20 text-xs text-slate-400 rounded flex items-center gap-1.5 leading-tight">
-                      <span className="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
                       Cada janela horária possui limite estrito de 2 recebimentos simultâneos.
                     </div>
                   )}
@@ -551,7 +566,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
             {/* Secao 4: Detalhes da Carga */}
             <div className="pt-2">
               <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <span className="w-1.5 h-3.5 bg-[#ff6b35] rounded-full"></span>
+                <span className="w-1.5 h-3.5 bg-[#2563eb] rounded-full"></span>
                 4. Especificações da Carga Alimentícia
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -563,7 +578,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                     id="product-type-select"
                     value={productType}
                     onChange={(e) => setProductType(e.target.value as ProductType)}
-                    className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#ff6b35] focus:ring-1 focus:ring-[#ff6b35] rounded-lg py-2 px-3 text-sm text-white focus:outline-none transition-colors"
+                    className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] rounded-lg py-2 px-3 text-sm text-white focus:outline-none transition-colors"
                   >
                     <option value={ProductType.Balas}>Balas e Doces</option>
                     <option value={ProductType.Chocolates}>Chocolates e Coberturas</option>
@@ -586,7 +601,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                     placeholder="Ex: 150"
                     value={volume}
                     onChange={(e) => setVolume(e.target.value)}
-                    className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#ff6b35] focus:ring-1 focus:ring-[#ff6b35] rounded-lg py-2 px-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors"
+                    className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] rounded-lg py-2 px-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors"
                   />
                 </div>
 
@@ -602,7 +617,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                     placeholder="Ex: 6"
                     value={pallets}
                     onChange={(e) => setPallets(e.target.value)}
-                    className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#ff6b35] focus:ring-1 focus:ring-[#ff6b35] rounded-lg py-2 px-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors"
+                    className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] rounded-lg py-2 px-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors"
                   />
                 </div>
 
@@ -619,7 +634,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                     placeholder="Ex: 2400"
                     value={weight}
                     onChange={(e) => setWeight(e.target.value)}
-                    className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#ff6b35] focus:ring-1 focus:ring-[#ff6b35] rounded-lg py-2 px-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors"
+                    className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] rounded-lg py-2 px-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors"
                   />
                 </div>
 
@@ -633,7 +648,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                     placeholder="Ex: 000.123.456"
                     value={invoiceNumber}
                     onChange={(e) => setInvoiceNumber(e.target.value)}
-                    className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#ff6b35] focus:ring-1 focus:ring-[#ff6b35] rounded-lg py-2 px-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors font-mono"
+                    className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] rounded-lg py-2 px-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors font-mono"
                   />
                 </div>
               </div>
@@ -650,7 +665,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                 placeholder="Ex e recomendações: Paletes empilhados, restrições de descarga por motorista, refrigeração necessária, etc."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#ff6b35] focus:ring-1 focus:ring-[#ff6b35] rounded-lg py-2.5 px-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors resize-none"
+                className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] rounded-lg py-2.5 px-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors resize-none"
               />
             </div>
 
@@ -663,7 +678,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                 id="btn-submit-booking"
                 type="submit"
                 disabled={!!dateError || !timeSlot}
-                className="bg-[#ff6b35] hover:bg-[#fa5216] disabled:bg-slate-800 disabled:text-slate-500 text-white font-semibold py-3 px-8 rounded-lg flex items-center justify-center gap-2 transition duration-200 shadow-lg active:scale-[0.99] disabled:scale-100 disabled:cursor-not-allowed cursor-pointer"
+                className="bg-[#2563eb] hover:bg-[#1d4ed8] disabled:bg-slate-800 disabled:text-slate-500 text-white font-semibold py-3 px-8 rounded-lg flex items-center justify-center gap-2 transition duration-200 shadow-lg active:scale-[0.99] disabled:scale-100 disabled:cursor-not-allowed cursor-pointer"
               >
                 Solicitar Reservar de Janela
               </button>

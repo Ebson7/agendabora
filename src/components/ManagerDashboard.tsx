@@ -31,12 +31,14 @@ interface ManagerDashboardProps {
   appointments: Appointment[];
   onUpdateStatus: (id: string, newStatus: AppointmentStatus) => void;
   onDeleteAppointment?: (id: string) => void;
+  isAdmin?: boolean;
 }
 
 export function ManagerDashboard({
   appointments,
   onUpdateStatus,
   onDeleteAppointment,
+  isAdmin = true,
 }: ManagerDashboardProps) {
   // Filters State
   const [searchTerm, setSearchTerm] = useState("");
@@ -178,7 +180,7 @@ export function ManagerDashboard({
       });
     });
 
-    txt += `_Boas operações! Atenciosamente, Gerência de Recebimento MarSil Boracéia_`;
+    txt += `_Boas operações! Atenciosamente, Gerência de Recebimento Marsil Atacadista Boracéia_`;
 
     navigator.clipboard.writeText(txt);
     alert("Grade de entregas do dia copiada no formato WhatsApp com sucesso!");
@@ -349,7 +351,7 @@ export function ManagerDashboard({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
           <div>
             <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-[#ff6b35]" />
+              <Calendar className="w-5 h-5 text-[#2563eb]" />
               Painel Diário de Vagas & Slots de Recebimento
             </h3>
             <p className="text-slate-400 text-xs mt-0.5">Controle de lotação: Cada slot permite no máximo 2 agendamentos simultâneos.</p>
@@ -362,12 +364,12 @@ export function ManagerDashboard({
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-[#0f1419] border border-slate-700/80 rounded px-2.5 py-1 text-xs text-white focus:outline-none focus:border-[#ff6b35]"
+              className="bg-[#0f1419] border border-slate-705 rounded px-2.5 py-1 text-xs text-white focus:outline-none focus:border-[#2563eb]"
             />
             {selectedDate && (
               <button
                 onClick={() => setSelectedDate("")}
-                className="text-[10px] hover:text-[#ff6b35] text-slate-500"
+                className="text-[10px] hover:text-[#2563eb] text-slate-500"
               >
                 Limpar Data
               </button>
@@ -385,7 +387,7 @@ export function ManagerDashboard({
                 onClick={() => setSelectedDate(day.dateStr)}
                 className={`py-1.5 px-1 md:py-2.5 rounded-lg flex flex-col items-center justify-center transition-all cursor-pointer relative ${
                   isSel
-                    ? "bg-[#ff6b35] text-white shadow-md shadow-[#ff6b35]/20 font-bold"
+                    ? "bg-[#2563eb] text-white shadow-md shadow-[#2563eb]/20 font-bold"
                     : "bg-[#0f1419] hover:bg-[#1a2129] text-slate-300 border border-slate-850 hover:border-slate-700"
                 }`}
               >
@@ -396,7 +398,7 @@ export function ManagerDashboard({
                 
                 {day.count > 0 && (
                   <span className={`absolute -top-1.5 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full text-[9px] font-bold px-1 ${
-                    isSel ? "bg-[#1a2129] text-[#ff6b35]" : "bg-[#ff6b35] text-white"
+                    isSel ? "bg-[#1a2129] text-[#2563eb]" : "bg-[#2563eb] text-white"
                   }`}>
                     {day.count}
                   </span>
@@ -421,7 +423,7 @@ export function ManagerDashboard({
               </div>
               <div className="text-center md:text-left border-t md:border-t-0 md:border-l border-slate-800 md:pl-4 pt-2 md:pt-0">
                 <span className="text-slate-500 text-[10px] uppercase font-mono block">Total de Paletes</span>
-                <span className="font-bold font-mono text-[#ff6b35] text-sm">{selectedDateMetrics.pallets} Paletes</span>
+                <span className="font-bold font-mono text-[#2563eb] text-sm">{selectedDateMetrics.pallets} Paletes</span>
               </div>
               <div className="text-center md:text-left border-t md:border-t-0 md:border-l border-slate-800 md:pl-4 pt-2 md:pt-0">
                 <span className="text-slate-500 text-[10px] uppercase font-mono block">Tonelagem Total</span>
@@ -431,7 +433,7 @@ export function ManagerDashboard({
 
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
                 Taxa de Ocupação das Docas para: {formatFriendlyDate(selectedDate)}
               </span>
 
@@ -461,29 +463,29 @@ export function ManagerDashboard({
                         onClick={() => handleExportExcel("dia")}
                         className="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-2 cursor-pointer"
                       >
-                        <span className="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
                         Agenda do Dia Selecionado
                       </button>
                       <button
                         onClick={() => handleExportExcel("semana")}
                         className="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-2 cursor-pointer"
                       >
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
                         Agenda da Semana (Seg-Sáb)
                       </button>
                       <button
                         onClick={() => handleExportExcel("mes")}
                         className="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-2 cursor-pointer"
                       >
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-450"></span>
                         Agenda do Mês Inteiro
                       </button>
                       <div className="border-t border-slate-800 my-1"></div>
                       <button
                         onClick={() => handleExportExcel("historico")}
-                        className="w-full text-left px-4 py-2 text-xs font-semibold text-orange-400 hover:bg-slate-800 hover:text-orange-300 transition flex items-center gap-2 cursor-pointer"
+                        className="w-full text-left px-4 py-2 text-xs font-semibold text-blue-400 hover:bg-slate-800 hover:text-blue-300 transition flex items-center gap-2 cursor-pointer"
                       >
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
                         Todo o Histórico (Completo)
                       </button>
                     </div>
@@ -534,7 +536,7 @@ export function ManagerDashboard({
       {/* 3. Operational Section: Search Filters, Operations List & Detail actions */}
       <div className="bg-[#1a2129] border border-slate-800 rounded-lg p-5">
         <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-1.5">
-          <Filter className="w-4 h-4 text-[#ff6b35]" />
+          <Filter className="w-4 h-4 text-[#2563eb]" />
           Lista de Agendamentos Filtrados ({filteredAppointments.length})
         </h3>
 
@@ -548,7 +550,7 @@ export function ManagerDashboard({
               placeholder="Buscar por Fornecedor, Motorista, Placa do Veículo ou Protocolo..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#ff6b35] focus:ring-1 focus:ring-[#ff6b35] rounded-md py-1.5 pl-9 pr-4 text-xs text-white focus:outline-none placeholder-slate-500"
+              className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] rounded-md py-1.5 pl-9 pr-4 text-xs text-white focus:outline-none placeholder-slate-500"
             />
           </div>
 
@@ -601,7 +603,7 @@ export function ManagerDashboard({
               return (
                 <div
                   key={app.id}
-                  className="bg-[#0f1419] border border-slate-850 hover:border-[#ff6b35]/60 rounded-lg p-4 transition duration-150 flex flex-col justify-between"
+                  className="bg-[#0f1419] border border-slate-850 hover:border-[#2563eb]/60 rounded-lg p-4 transition duration-150 flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2 mb-2">
@@ -631,7 +633,7 @@ export function ManagerDashboard({
                       </div>
                       <div>
                         <span className="text-slate-500 text-[10px] block font-medium">PRODUTOR / NF</span>
-                        <p className="truncate text-slate-300">
+                        <p className="truncate text-slate-350">
                           {app.productType} {app.invoiceNumber ? `(NF: ${app.invoiceNumber})` : ""}
                         </p>
                       </div>
@@ -649,7 +651,7 @@ export function ManagerDashboard({
                       </div>
                     )}
                     <div className="text-[10.5px] text-slate-450 mb-3 block truncate shrink-0">
-                      Cadastrado por: <strong className="text-orange-400 font-medium">{app.createdBy || "Sistema"}</strong>
+                      Cadastrado por: <strong className="text-blue-400 font-medium">{app.createdBy || "Sistema"}</strong>
                     </div>
                   </div>
 
@@ -658,9 +660,9 @@ export function ManagerDashboard({
                     <button
                       type="button"
                       onClick={() => setSelectedApp(app)}
-                      className="text-xs text-[#ff6b35] hover:text-[#fa5216] font-semibold flex items-center gap-0.5 cursor-pointer"
+                      className="text-xs text-[#2563eb] hover:text-[#1d4ed8] font-semibold flex items-center gap-0.5 cursor-pointer"
                     >
-                      Gerenciar Status <ChevronRight className="w-4.5 h-4.5" />
+                      {isAdmin ? "Gerenciar Status" : "Ver Detalhes"} <ChevronRight className="w-4.5 h-4.5" />
                     </button>
                   </div>
                 </div>
@@ -676,8 +678,10 @@ export function ManagerDashboard({
           <div className="bg-[#1a2129] border border-slate-700/80 rounded-xl max-w-lg w-full overflow-hidden shadow-2xl">
             <div className="bg-[#0f1419] p-4 border-b border-slate-850 flex items-center justify-between">
               <div>
-                <span className="text-[10px] text-slate-500 font-mono tracking-wider block">ALTERAR STATUS DE CARGA</span>
-                <span className="text-sm font-mono font-bold text-[#ff6b35]">{selectedApp.id}</span>
+                <span className="text-[10px] text-slate-500 font-mono tracking-wider block">
+                  {isAdmin ? "ALTERAR STATUS DE CARGA" : "DETALHES DO AGENDAMENTO"}
+                </span>
+                <span className="text-sm font-mono font-bold text-[#2563eb]">{selectedApp.id}</span>
               </div>
               <button
                 onClick={() => setSelectedApp(null)}
@@ -693,7 +697,7 @@ export function ManagerDashboard({
                 <p className="font-bold text-white text-base">{selectedApp.supplierName}</p>
                 <div className="flex items-center justify-between text-xs text-slate-400 mt-1 flex-wrap gap-2">
                   <span>CNPJ: {selectedApp.cnpj}</span>
-                  <span>Agendado por: <strong className="text-[#ff6b35] font-semibold">{selectedApp.createdBy || "Sistema"}</strong></span>
+                  <span>Agendado por: <strong className="text-[#2563eb] font-semibold">{selectedApp.createdBy || "Sistema"}</strong></span>
                 </div>
               </div>
 
@@ -701,7 +705,7 @@ export function ManagerDashboard({
                 <div>
                   <span className="text-slate-500 block font-medium">Grade Solicitada</span>
                   <p className="font-semibold text-slate-200 mt-0.5">{formatFriendlyDate(selectedApp.date)}</p>
-                  <p className="font-mono text-[#ff6b35] font-semibold">{selectedApp.timeSlot}</p>
+                  <p className="font-mono text-[#2563eb] font-semibold">{selectedApp.timeSlot}</p>
                 </div>
                 <div>
                   <span className="text-slate-500 block font-medium">Logística Veicular</span>
@@ -715,54 +719,99 @@ export function ManagerDashboard({
                 <div className="flex items-center justify-between text-slate-300 font-mono gap-2 flex-wrap">
                   <span>Família: <strong className="text-white">{selectedApp.productType}</strong></span>
                   <span>Vol: <strong className="text-white">{selectedApp.volume} cx</strong></span>
-                  <span>Paletes: <strong className="text-[#ff6b35]">{selectedApp.pallets || 0}</strong></span>
+                  <span>Paletes: <strong className="text-[#2563eb]">{selectedApp.pallets || 0}</strong></span>
                   <span>Peso: <strong className="text-white">{selectedApp.weight.toLocaleString("pt-BR")} kg</strong></span>
                 </div>
               </div>
 
-              <div className="p-3 bg-amber-500/10 border-l-3 border-amber-500 text-[11px] text-amber-300 leading-relaxed rounded-r">
-                <p className="font-semibold mb-0.5">Controle de Lotação Doca Boracéia:</p>
-                Lembre-se que cada slot de 1 hora suporta no máximo 2 veículos. Salvar uma carga como AGUARDANDO ou CONFIRMADO ocupa a vaga no slot selecionado.
-              </div>
+              {isAdmin ? (
+                <>
+                  <div className="p-3 bg-amber-500/10 border-l-3 border-amber-500 text-[11px] text-amber-300 leading-relaxed rounded-r">
+                    <p className="font-semibold mb-0.5">Controle de Lotação Doca Boracéia:</p>
+                    Lembre-se que cada slot de 1 hora suporta no máximo 2 veículos. Salvar uma carga como AGUARDANDO ou CONFIRMADO ocupa a vaga no slot selecionado.
+                  </div>
 
-              {/* Status change selector dropdown */}
-              <div>
-                <label htmlFor="modal-status-select" className="block text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">
-                  Novo Status Operacional:
-                </label>
-                <div className="grid grid-cols-1 gap-2.5">
-                  {[
-                    { status: AppointmentStatus.Aguardando, label: "🟡 AGUARDANDO CONFIRMAÇÃO (Vaga retida)", color: "text-amber-400 hover:bg-amber-500/10" },
-                    { status: AppointmentStatus.Confirmado, label: "🟢 CONFIRMADO (Apto para descarregar)", color: "text-[#51cf66] hover:bg-[#51cf66]/10" },
-                    { status: AppointmentStatus.EmRecebimento, label: "🔵 EM RECEBIMENTO (Na Doca de Descarga)", color: "text-[#4dabf7] hover:bg-[#4dabf7]/10" },
-                    { status: AppointmentStatus.Concluido, label: "✅ CONCLUÍDO (Notas fiscais emitidas)", color: "text-slate-300 hover:bg-slate-700/20" },
-                    { status: AppointmentStatus.Cancelado, label: "❌ CANCELADO (Libera doca imediatamente)", color: "text-[#ff6b6b] hover:bg-[#ff6b6b]/10" },
-                  ].map((elem) => {
-                    const isCurrent = selectedApp.status === elem.status;
-                    return (
-                      <button
-                        key={elem.status}
-                        onClick={() => {
-                          onUpdateStatus(selectedApp.id, elem.status);
-                          setSelectedApp(null);
-                        }}
-                        className={`w-full text-left py-2 px-3 border rounded text-xs transition flex items-center justify-between cursor-pointer ${elem.color} ${
-                          isCurrent
-                            ? "border-[#ff6b35] bg-[#ff6b35]/15 font-bold"
-                            : "border-slate-800 bg-[#0f1419]"
-                        }`}
-                      >
-                        <span>{elem.label}</span>
-                        {isCurrent && <span className="bg-[#ff6b35] text-white text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">ATIVO</span>}
-                      </button>
-                    );
-                  })}
+                  {/* Status change selector dropdown */}
+                  <div>
+                    <label htmlFor="modal-status-select" className="block text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">
+                      Novo Status Operacional:
+                    </label>
+                    <div className="grid grid-cols-1 gap-2.5">
+                      {[
+                        { status: AppointmentStatus.Aguardando, label: "🟡 AGUARDANDO CONFIRMAÇÃO (Vaga retida)", color: "text-amber-400 hover:bg-amber-500/10" },
+                        { status: AppointmentStatus.Confirmado, label: "🟢 CONFIRMADO (Apto para descarregar)", color: "text-[#51cf66] hover:bg-[#51cf66]/10" },
+                        { status: AppointmentStatus.EmRecebimento, label: "🔵 EM RECEBIMENTO (Na Doca de Descarga)", color: "text-[#4dabf7] hover:bg-[#4dabf7]/10" },
+                        { status: AppointmentStatus.Concluido, label: "✅ CONCLUÍDO (Notas fiscais emitidas)", color: "text-slate-300 hover:bg-slate-700/20" },
+                        { status: AppointmentStatus.Cancelado, label: "❌ CANCELADO (Libera doca imediatamente)", color: "text-[#ff6b6b] hover:bg-[#ff6b6b]/10" },
+                      ].map((elem) => {
+                        const isCurrent = selectedApp.status === elem.status;
+                        return (
+                          <button
+                            key={elem.status}
+                            onClick={() => {
+                              onUpdateStatus(selectedApp.id, elem.status);
+                              setSelectedApp(null);
+                            }}
+                            className={`w-full text-left py-2 px-3 border rounded text-xs transition flex items-center justify-between cursor-pointer ${elem.color} ${
+                              isCurrent
+                                ? "border-[#2563eb] bg-[#2563eb]/15 font-bold"
+                                : "border-slate-800 bg-[#0f1419]"
+                            }`}
+                          >
+                            <span>{elem.label}</span>
+                            {isCurrent && <span className="bg-[#2563eb] text-white text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">ATIVO</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="p-4 bg-slate-850/50 rounded border border-slate-700/40">
+                  <span className="block text-xs text-slate-450 font-semibold uppercase tracking-wider mb-2">
+                    Status Operacional do Agendamento:
+                  </span>
+                  <div className="py-3 px-4 bg-[#0f1419] rounded-lg border border-slate-800 text-xs flex items-center justify-between">
+                    <span className="font-semibold text-slate-200 flex items-center gap-2">
+                      {selectedApp.status === AppointmentStatus.Aguardando && (
+                        <>
+                          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                          🟡 AGUARDANDO CONFIRMAÇÃO
+                        </>
+                      )}
+                      {selectedApp.status === AppointmentStatus.Confirmado && (
+                        <>
+                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                          🟢 CONFIRMADO (Carga Liberada)
+                        </>
+                      )}
+                      {selectedApp.status === AppointmentStatus.EmRecebimento && (
+                        <>
+                          <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                          🔵 EM RECEBIMENTO (Na Doca)
+                        </>
+                      )}
+                      {selectedApp.status === AppointmentStatus.Concluido && (
+                        <>
+                          <span className="w-2 h-2 rounded-full bg-slate-400"></span>
+                          ✅ CONCLUÍDO (Recebimento Finalizado)
+                        </>
+                      )}
+                      {selectedApp.status === AppointmentStatus.Cancelado && (
+                        <>
+                          <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                          ❌ CANCELADO
+                        </>
+                      )}
+                    </span>
+                    <span className="text-[10px] bg-slate-800/80 text-slate-400 px-2 py-0.5 rounded font-bold font-mono">SOMENTE LEITURA</span>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <div className="bg-[#0f1419] py-3.5 px-6 border-t border-slate-850 flex justify-between items-center">
-              {onDeleteAppointment && (
+              {isAdmin && onDeleteAppointment ? (
                 <button
                   type="button"
                   onClick={() => {
@@ -776,6 +825,10 @@ export function ManagerDashboard({
                   <Trash2 className="w-3.5 h-3.5" />
                   Excluir Agendamento
                 </button>
+              ) : (
+                <div className="text-[11px] text-slate-500 italic">
+                  Apenas administradores podem gerenciar agendamentos.
+                </div>
               )}
 
               <button
@@ -783,7 +836,7 @@ export function ManagerDashboard({
                 onClick={() => setSelectedApp(null)}
                 className="bg-slate-800 hover:bg-slate-700 hover:text-white px-4 py-1.5 rounded text-xs font-semibold text-slate-300 cursor-pointer"
               >
-                Voltar
+                Fechar
               </button>
             </div>
           </div>

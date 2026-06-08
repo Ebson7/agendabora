@@ -7,6 +7,7 @@ import React, { useState, useEffect } from "react";
 import { Appointment, AppointmentStatus, VehicleType, ProductType } from "../types";
 import { isDateBlocked, TIME_SLOTS, formatFriendlyDate } from "../utils/dateUtils";
 import { Calendar, Building2, User, Truck, FileText, Package, Check, Clipboard, Printer, AlertTriangle } from "lucide-react";
+import { copyToClipboard } from "../utils/clipboard";
 
 interface SupplierFormProps {
   appointments: Appointment[];
@@ -281,7 +282,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
       ? successAppointment.cargoValue.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
       : "Não informado";
 
-    navigator.clipboard.writeText(
+    copyToClipboard(
       `AGENDAMENTO CD BORACÉIA CONCLUÍDO!\n` +
       `Protocolo: ${successAppointment.id}\n` +
       `Fornecedor: ${successAppointment.supplierName}\n` +
@@ -292,9 +293,14 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
       `NFs: ${nfs}\n` +
       `Valor da Carga: ${valorStr}\n` +
       `Status: ${successAppointment.status}`
-    );
-    setCopied(true);
-    setTimeout(() => setCopied(false), 3000);
+    ).then((success) => {
+      if (success) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 3000);
+      } else {
+        alert("Não foi possível copiar automaticamente. Por favor, tente copiar manualmente.");
+      }
+    });
   };
 
   const handlePrint = () => {

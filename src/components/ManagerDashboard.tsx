@@ -7,6 +7,7 @@ import React, { useState, useMemo } from "react";
 import * as XLSX from "xlsx";
 import { Appointment, AppointmentStatus } from "../types";
 import { TIME_SLOTS, formatFriendlyDate, formatDayMonth } from "../utils/dateUtils";
+import { copyToClipboard } from "../utils/clipboard";
 import {
   Calendar,
   Search,
@@ -182,8 +183,13 @@ export function ManagerDashboard({
 
     txt += `_Boas operações! Atenciosamente, Gerência de Recebimento Marsil Atacadista Boracéia_`;
 
-    navigator.clipboard.writeText(txt);
-    alert("Grade de entregas do dia copiada no formato WhatsApp com sucesso!");
+    copyToClipboard(txt).then((success) => {
+      if (success) {
+        alert("Grade de entregas do dia copiada no formato WhatsApp com sucesso!");
+      } else {
+        alert("Não foi possível copiar automaticamente. Por favor, tente copiar manualmente.");
+      }
+    });
   };
 
   const handleExportExcel = (mode: "dia" | "semana" | "mes" | "historico") => {

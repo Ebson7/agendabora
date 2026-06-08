@@ -99,17 +99,47 @@ export default function App() {
 
   // Sync to database with local feedback
   const handleAddAppointment = async (newApp: Appointment) => {
+    // Sanitize newApp to remove any undefined properties recursively to ensure Firestore compatibility
+    const sanitizeObj = (data: any): any => {
+      if (data === null || data === undefined) return null;
+      if (Array.isArray(data)) {
+        return data.map(sanitizeObj);
+      }
+      if (typeof data === "object") {
+        const cleaned: any = {};
+        Object.keys(data).forEach((key) => {
+          const val = data[key];
+          if (val !== undefined) {
+            cleaned[key] = sanitizeObj(val);
+          }
+        });
+        return cleaned;
+      }
+      return data;
+    };
+
+    const cleanedApp = sanitizeObj(newApp);
+
     // Optimistic UI state updater
-    const updated = [newApp, ...appointments];
+    const updated = [cleanedApp, ...appointments];
     setAppointments(updated);
     localStorage.setItem("bc_appointments", JSON.stringify(updated));
 
     try {
-      await setDoc(doc(db, "appointments", newApp.id), newApp);
+      await setDoc(doc(db, "appointments", cleanedApp.id), cleanedApp);
     } catch (error) {
-      console.warn("Firebase upload delayed. Local cache saved.", error);
+      console.error("Firebase upload failed. Reverting local cache.", error);
+      
+      // Revert optimistic update
+      const reverted = appointments.filter(app => app.id !== cleanedApp.id);
+      setAppointments(reverted);
+      localStorage.setItem("bc_appointments", JSON.stringify(reverted));
+      
+      const errMsg = error instanceof Error ? error.message : "Erro desconhecido";
+      alert(`⚠️ ERRO AO GRAVAR NO BANCO DE DADOS!\n\nNão foi possível salvar o agendamento no servidor do Firebase.\n\nDetalhes do Erro: ${errMsg}\n\nPor favor, verifique se todos os campos obrigatórios estão corretos e certifique-se de que possui uma conexão ativa de rede.`);
+      
       try {
-        handleFirestoreError(error, OperationType.CREATE, `appointments/${newApp.id}`);
+        handleFirestoreError(error, OperationType.CREATE, `appointments/${cleanedApp.id}`);
       } catch (e) {
         console.error(e);
       }
@@ -117,6 +147,9 @@ export default function App() {
   };
 
   const handleUpdateStatus = async (id: string, newStatus: AppointmentStatus) => {
+    // Save original state for possible reversion
+    const originalAppointments = [...appointments];
+
     // Optimistic UI status updater 
     const updated = appointments.map((app) => {
       if (app.id === id) {
@@ -131,7 +164,15 @@ export default function App() {
       const docRef = doc(db, "appointments", id);
       await updateDoc(docRef, { status: newStatus });
     } catch (error) {
-      console.warn("Firestore update postponed. Local state synchronized.", error);
+      console.error("Firestore update failed. Reverting status.", error);
+      
+      // Revert state
+      setAppointments(originalAppointments);
+      localStorage.setItem("bc_appointments", JSON.stringify(originalAppointments));
+      
+      const errMsg = error instanceof Error ? error.message : "Erro desconhecido";
+      alert(`⚠️ ERRO AO ATUALIZAR STATUS NO SERVIDOR!\n\nNão foi possível sincronizar a alteração de status com o banco de dados.\n\nDetalhes do Erro: ${errMsg}`);
+      
       try {
         handleFirestoreError(error, OperationType.UPDATE, `appointments/${id}`);
       } catch (e) {
@@ -141,6 +182,9 @@ export default function App() {
   };
 
   const handleDeleteAppointment = async (id: string) => {
+    // Save original state for possible reversion
+    const originalAppointments = [...appointments];
+
     // Optimistic UI state updater
     const updated = appointments.filter((app) => app.id !== id);
     setAppointments(updated);
@@ -150,7 +194,15 @@ export default function App() {
       const docRef = doc(db, "appointments", id);
       await deleteDoc(docRef);
     } catch (error) {
-      console.warn("Firestore delete postponed. Local state synchronized.", error);
+      console.error("Firestore delete failed. Reverting list.", error);
+      
+      // Revert state
+      setAppointments(originalAppointments);
+      localStorage.setItem("bc_appointments", JSON.stringify(originalAppointments));
+      
+      const errMsg = error instanceof Error ? error.message : "Erro desconhecido";
+      alert(`⚠️ ERRO AO EXCLUIR NO SERVIDOR!\n\nNão foi possível excluir o agendamento no banco de dados.\n\nDetalhes do Erro: ${errMsg}`);
+      
       try {
         handleFirestoreError(error, OperationType.DELETE, `appointments/${id}`);
       } catch (e) {
@@ -192,39 +244,30 @@ export default function App() {
           {/* Interactive Navigation Tabs & User Sessions */}
           <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center bg-[#0f1419] p-1 rounded-lg border border-slate-800">
-              {currentUser.role === "admin" ? (
-                <>
-                  <button
-                    id="tab-button-supplier"
-                    onClick={() => setActiveTab("supplier")}
-                    className={`px-4 py-2 rounded-md text-xs font-semibold tracking-wide flex items-center gap-2 transition cursor-pointer ${
-                      activeTab === "supplier"
-                        ? "bg-[#2563eb] text-white shadow-md shadow-[#2563eb]/10"
-                        : "text-slate-400 hover:text-white hover:bg-slate-850"
-                    }`}
-                  >
-                    <FileText className="w-4 h-4" />
-                    📦 AGENDAR CARGA
-                  </button>
-                  <button
-                    id="tab-button-manager"
-                    onClick={() => setActiveTab("manager")}
-                    className={`px-4 py-2 rounded-md text-xs font-semibold tracking-wide flex items-center gap-2 transition cursor-pointer ${
-                      activeTab === "manager"
-                        ? "bg-[#2563eb] text-white shadow-md shadow-[#2563eb]/10"
-                        : "text-slate-400 hover:text-white hover:bg-slate-850"
-                    }`}
-                  >
-                    <LayoutDashboard className="w-4 h-4" />
-                    📋 PAINEL DO GESTOR
-                  </button>
-                </>
-              ) : (
-                <div className="px-4 py-1.5 bg-slate-800/60 rounded-md text-xs font-semibold tracking-wide flex items-center gap-2 text-[#2563eb] border border-[#2563eb]/20">
-                  <LayoutDashboard className="w-4 h-4" />
-                  📋 AGENDA DE CARGAS (CONSULTA)
-                </div>
-              )}
+              <button
+                id="tab-button-supplier"
+                onClick={() => setActiveTab("supplier")}
+                className={`px-4 py-2 rounded-md text-xs font-semibold tracking-wide flex items-center gap-2 transition cursor-pointer ${
+                  activeTab === "supplier"
+                    ? "bg-[#2563eb] text-white shadow-md shadow-[#2563eb]/10"
+                    : "text-slate-400 hover:text-white hover:bg-slate-850"
+                }`}
+              >
+                <FileText className="w-4 h-4" />
+                📦 AGENDAR CARGA
+              </button>
+              <button
+                id="tab-button-manager"
+                onClick={() => setActiveTab("manager")}
+                className={`px-4 py-2 rounded-md text-xs font-semibold tracking-wide flex items-center gap-2 transition cursor-pointer ${
+                  activeTab === "manager"
+                    ? "bg-[#2563eb] text-white shadow-md shadow-[#2563eb]/10"
+                    : "text-slate-400 hover:text-white hover:bg-slate-850"
+                }`}
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                {currentUser.role === "admin" ? "📋 PAINEL DO GESTOR" : "📋 CONSULTA DA AGENDA"}
+              </button>
             </div>
 
             {/* Profile info and Log Out */}
@@ -267,7 +310,7 @@ export default function App() {
         </div>
 
         {/* View Switcher based on tab state */}
-        {activeTab === "supplier" && currentUser.role === "admin" ? (
+        {activeTab === "supplier" ? (
           <div>
             <div className="mb-4">
               <h2 className="text-xl font-bold text-white font-sans tracking-tight">Solicitação de Horário para Descarga</h2>

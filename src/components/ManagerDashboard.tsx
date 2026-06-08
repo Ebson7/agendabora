@@ -23,7 +23,8 @@ import {
   TrendingUp,
   Boxes,
   XCircle,
-  FileCheck
+  FileCheck,
+  Trash2
 } from "lucide-react";
 
 interface ManagerDashboardProps {
@@ -32,7 +33,11 @@ interface ManagerDashboardProps {
   onDeleteAppointment?: (id: string) => void;
 }
 
-export function ManagerDashboard({ appointments, onUpdateStatus }: ManagerDashboardProps) {
+export function ManagerDashboard({
+  appointments,
+  onUpdateStatus,
+  onDeleteAppointment,
+}: ManagerDashboardProps) {
   // Filters State
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
@@ -168,7 +173,8 @@ export function ManagerDashboard({ appointments, onUpdateStatus }: ManagerDashbo
         txt += `  • *${app.supplierName}* (${app.productType})\n`;
         txt += `    | Placa: ${app.plate} | Mot: ${app.driverName}\n`;
         txt += `    | Qtd: ${app.volume} vol | Peso: ${app.weight.toLocaleString("pt-BR")} kg\n`;
-        txt += `    | Protocolo: ${app.id} | Status: ${checkIcon} ${app.status}\n\n`;
+        txt += `    | Protocolo: ${app.id} | Responsável: ${app.createdBy || "Sistema"}\n`;
+        txt += `    | Status: ${checkIcon} ${app.status}\n\n`;
       });
     });
 
@@ -238,6 +244,7 @@ export function ManagerDashboard({ appointments, onUpdateStatus }: ManagerDashbo
       "Número da NF": appt.invoiceNumber || "Não informado",
       Observações: appt.notes || "",
       Status: appt.status,
+      "Cadastrado Por": appt.createdBy || "Sistema",
       "Criado em": new Date(appt.createdAt).toLocaleString("pt-BR"),
     }));
 
@@ -637,10 +644,13 @@ export function ManagerDashboard({ appointments, onUpdateStatus }: ManagerDashbo
                     </div>
 
                     {app.notes && (
-                      <div className="bg-slate-850/50 rounded p-1.5 text-[11px] text-slate-400 italic line-clamp-1 mb-3 shrink-0">
+                      <div className="bg-slate-850/50 rounded p-1.5 text-[11px] text-slate-400 italic line-clamp-1 mb-2 shrink-0">
                         Obs: {app.notes}
                       </div>
                     )}
+                    <div className="text-[10.5px] text-slate-450 mb-3 block truncate shrink-0">
+                      Cadastrado por: <strong className="text-orange-400 font-medium">{app.createdBy || "Sistema"}</strong>
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between border-t border-slate-850/80 pt-2 mt-auto">
@@ -681,7 +691,10 @@ export function ManagerDashboard({ appointments, onUpdateStatus }: ManagerDashbo
               <div className="text-sm">
                 <span className="text-slate-500 text-xs block">Fornecedor / Emitente</span>
                 <p className="font-bold text-white text-base">{selectedApp.supplierName}</p>
-                <p className="text-xs text-slate-400 mt-0.5">CNPJ: {selectedApp.cnpj}</p>
+                <div className="flex items-center justify-between text-xs text-slate-400 mt-1 flex-wrap gap-2">
+                  <span>CNPJ: {selectedApp.cnpj}</span>
+                  <span>Agendado por: <strong className="text-[#ff6b35] font-semibold">{selectedApp.createdBy || "Sistema"}</strong></span>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-xs bg-[#0f1419] p-3.5 rounded border border-slate-850">
@@ -748,7 +761,23 @@ export function ManagerDashboard({ appointments, onUpdateStatus }: ManagerDashbo
               </div>
             </div>
 
-            <div className="bg-[#0f1419] py-3.5 px-6 border-t border-slate-850 flex justify-end">
+            <div className="bg-[#0f1419] py-3.5 px-6 border-t border-slate-850 flex justify-between items-center">
+              {onDeleteAppointment && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm(`Deseja realmente EXCLUIR permanentemente o agendamento ${selectedApp.id}?`)) {
+                      onDeleteAppointment(selectedApp.id);
+                      setSelectedApp(null);
+                    }
+                  }}
+                  className="bg-red-950/20 hover:bg-red-900/30 border border-red-900/45 hover:border-red-750 text-red-400 hover:text-red-300 px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Excluir Agendamento
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={() => setSelectedApp(null)}

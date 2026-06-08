@@ -35,6 +35,7 @@ service cloud.firestore {
           && data.pallets is int && data.pallets >= 0
           && data.weight is number && data.weight >= 0
           && (data.status == 'AGUARDANDO CONFIRMAÇÃO' || data.status == 'CONFIRMADO' || data.status == 'EM RECEBIMENTO' || data.status == 'CONCLUÍDO' || data.status == 'CANCELADO')
+          && data.createdBy is string && data.createdBy.size() <= 128
           && data.createdAt is string;
     }
 
@@ -52,10 +53,11 @@ service cloud.firestore {
       allow update: if isValidId(appointmentId)
                    && isValidAppointment(incoming())
                    && incoming().id == existing().id
+                   && incoming().createdBy == existing().createdBy
                    && incoming().createdAt == existing().createdAt;
 
-      // Allow deletion only if the status is Canceled
-      allow delete: if existing().status == 'CANCELADO';
+      // Allow deletion of any appointment
+      allow delete: if true;
     }
   }
 }

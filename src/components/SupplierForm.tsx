@@ -28,6 +28,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
   const [weight, setWeight] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [notes, setNotes] = useState("");
+  const [createdBy, setCreatedBy] = useState("");
 
   // UI States
   const [dateError, setDateError] = useState("");
@@ -35,22 +36,21 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
   const [successAppointment, setSuccessAppointment] = useState<Appointment | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // Date constraints: Min = Tomorrow, Max = 30 days ahead
+  // Date constraints: Min = Today, Max = 30 days ahead
   const [minDateStr, setMinDateStr] = useState("");
   const [maxDateStr, setMaxDateStr] = useState("");
 
   useEffect(() => {
     const today = new Date();
     
-    // Tomorrow
-    const tom = new Date(today);
-    tom.setDate(today.getDate() + 1);
-    const tomY = tom.getFullYear();
-    const tomM = String(tom.getMonth() + 1).padStart(2, "0");
-    const tomD = String(tom.getDate()).padStart(2, "0");
-    setMinDateStr(`${tomY}-${tomM}-${tomD}`);
+    // Today
+    const minDObj = new Date(today);
+    const minY = minDObj.getFullYear();
+    const minM = String(minDObj.getMonth() + 1).padStart(2, "0");
+    const minD = String(minDObj.getDate()).padStart(2, "0");
+    setMinDateStr(`${minY}-${minM}-${minD}`);
 
-    // Tomorrow + 30 days
+    // Today + 30 days
     const maxDate = new Date(today);
     maxDate.setDate(today.getDate() + 30);
     const maxY = maxDate.getFullYear();
@@ -131,8 +131,8 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
     e.preventDefault();
 
     // Re-verify inputs
-    if (!supplierName || !cnpj || !driverName || !plate || !date || !timeSlot || !volume || !pallets || !weight) {
-      alert("Por favor, preencha todos os campos obrigatórios, incluindo a quantidade de palete de apoio.");
+    if (!supplierName || !cnpj || !driverName || !plate || !date || !timeSlot || !volume || !pallets || !weight || !createdBy) {
+      alert("Por favor, preencha todos os campos obrigatórios, incluindo quem está cadastrando o agendamento.");
       return;
     }
 
@@ -173,6 +173,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
       invoiceNumber: invoiceNumber.trim() || undefined,
       notes: notes.trim() || undefined,
       status: AppointmentStatus.Aguardando,
+      createdBy: createdBy.trim(),
       createdAt: new Date().toISOString(),
     };
 
@@ -193,6 +194,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
     setWeight("");
     setInvoiceNumber("");
     setNotes("");
+    setCreatedBy("");
   };
 
   const handleCopyProtocol = () => {
@@ -285,6 +287,11 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
               <p className="font-semibold">{successAppointment.volume} caixas / {successAppointment.pallets} paletes / {successAppointment.weight.toLocaleString("pt-BR")} kg</p>
             </div>
 
+            <div>
+              <p className="text-slate-400 text-xs print:text-slate-500">Responsável pelo Cadastro</p>
+              <p className="font-semibold text-[#ff6b35] print:text-black">{successAppointment.createdBy}</p>
+            </div>
+
             {successAppointment.invoiceNumber && (
               <div>
                 <p className="text-slate-400 text-xs print:text-slate-500">Nota Fiscal (NF)</p>
@@ -348,7 +355,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                 <span className="w-1.5 h-3.5 bg-[#ff6b35] rounded-full"></span>
                 1. Dados Corporativos do Fornecedor
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label htmlFor="supplier-name-input" className="block text-xs text-slate-400 font-medium mb-1.5">
                     Razão Social / Nome do Fornecedor <span className="text-red-500">*</span>
@@ -381,6 +388,24 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                       value={cnpj}
                       onChange={handleCnpjChange}
                       className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#ff6b35] focus:ring-1 focus:ring-[#ff6b35] rounded-lg py-2 pl-10 pr-4 text-sm font-mono text-white placeholder-slate-500 focus:outline-none transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="created-by-input" className="block text-xs text-slate-400 font-medium mb-1.5">
+                    Responsável pelo Cadastro <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-2.5 w-4.5 h-4.5 text-slate-500" />
+                    <input
+                      id="created-by-input"
+                      type="text"
+                      required
+                      placeholder="Ex: Amanda Silva (Logística)"
+                      value={createdBy}
+                      onChange={(e) => setCreatedBy(e.target.value)}
+                      className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#ff6b35] focus:ring-1 focus:ring-[#ff6b35] rounded-lg py-2 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors"
                     />
                   </div>
                 </div>

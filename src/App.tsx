@@ -9,7 +9,7 @@ import { SupplierForm } from "./components/SupplierForm";
 import { ManagerDashboard } from "./components/ManagerDashboard";
 import { generateSeedAppointments } from "./utils/seedData";
 import { db } from "./lib/firebase";
-import { collection, onSnapshot, doc, setDoc, updateDoc } from "firebase/firestore";
+import { collection, onSnapshot, doc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { Truck, Users, LayoutDashboard, Calendar, HelpCircle, Shield, FileText } from "lucide-react";
 
 export default function App() {
@@ -114,6 +114,20 @@ export default function App() {
     }
   };
 
+  const handleDeleteAppointment = async (id: string) => {
+    // Optimistic UI state updater
+    const updated = appointments.filter((app) => app.id !== id);
+    setAppointments(updated);
+    localStorage.setItem("bc_appointments", JSON.stringify(updated));
+
+    try {
+      const docRef = doc(db, "appointments", id);
+      await deleteDoc(docRef);
+    } catch (error) {
+      console.warn("Firestore delete postponed. Local state synchronized.", error);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-[#0f1419] text-slate-100 antialiased font-sans filter-none print:bg-white print:text-black">
       {/* Brand Header / Banner */}
@@ -179,7 +193,7 @@ export default function App() {
           <div className="flex items-center gap-2">
             <span className="bg-[#ff6b35] text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">Regras CD</span>
             <p>
-              Janelas de 1 hora (06h às 18h). Limite de <strong>2 agendamentos por janela</strong> (2 docas). Não permite agendamentos no próprio dia.
+              Janelas de 1 hora (06h às 18h). Limite de <strong>2 agendamentos por janela</strong> (2 docas). Permite agendamentos no próprio dia.
             </p>
           </div>
           <div className="flex items-center gap-3 font-mono text-slate-400 shrink-0">
@@ -203,7 +217,7 @@ export default function App() {
               <h2 className="text-xl font-bold text-white font-sans tracking-tight">Controle Operacional de Recebimento</h2>
               <p className="text-slate-400 text-xs mt-1">Acompanhe as entregas, valide docas ocupadas e marque cargas como recebidas de forma instantânea.</p>
             </div>
-            <ManagerDashboard appointments={appointments} onUpdateStatus={handleUpdateStatus} />
+            <ManagerDashboard appointments={appointments} onUpdateStatus={handleUpdateStatus} onDeleteAppointment={handleDeleteAppointment} />
           </div>
         )}
 

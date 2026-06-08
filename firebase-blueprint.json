@@ -65,6 +65,10 @@
           "type": "string",
           "description": "Status enum like AGUARDANDO CONFIRMAÇÃO"
         },
+        "createdBy": {
+          "type": "string",
+          "description": "Name/Role of the person registering the appointment"
+        },
         "createdAt": {
           "type": "string",
           "description": "ISO date string"
@@ -84,6 +88,7 @@
         "pallets",
         "weight",
         "status",
+        "createdBy",
         "createdAt"
       ]
     }

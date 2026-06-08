@@ -43,6 +43,7 @@ export interface Appointment {
   invoiceNumber?: string;
   notes?: string;
   status: AppointmentStatus;
+  createdBy: string; // Name of the person scheduling the appointment
   createdAt: string; // ISO date string
 }
 

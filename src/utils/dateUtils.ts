@@ -74,13 +74,13 @@ export function formatDayMonth(dateStr: string): string {
 }
 
 /**
- * Generates the list of allowed dates (tomorrow up to 30 days ahead)
+ * Generates the list of allowed dates (today up to 30 days ahead)
  */
 export function getAvailableDates(): { value: string; label: string }[] {
   const dates: { value: string; label: string }[] = [];
   const today = new Date();
   
-  for (let i = 1; i <= 30; i++) {
+  for (let i = 0; i <= 30; i++) {
     const nextDate = new Date();
     nextDate.setDate(today.getDate() + i);
     

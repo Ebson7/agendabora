@@ -45,6 +45,7 @@ export function generateSeedAppointments(): Appointment[] {
       invoiceNumber: "123455",
       notes: "Carga paletizada. Necessita de transpaleteira elétrica.",
       status: AppointmentStatus.Confirmado,
+      createdBy: "Sistema (Seeding)",
       createdAt: new Date().toISOString(),
     },
     {
@@ -63,6 +64,7 @@ export function generateSeedAppointments(): Appointment[] {
       invoiceNumber: "987110",
       notes: "Balas sortidas e chicletes.",
       status: AppointmentStatus.Aguardando,
+      createdBy: "Sistema (Seeding)",
       createdAt: new Date().toISOString(),
     },
     {
@@ -81,6 +83,7 @@ export function generateSeedAppointments(): Appointment[] {
       invoiceNumber: "554412",
       notes: "Entrega programada.",
       status: AppointmentStatus.EmRecebimento,
+      createdBy: "Sistema (Seeding)",
       createdAt: new Date().toISOString(),
     },
     {
@@ -99,6 +102,7 @@ export function generateSeedAppointments(): Appointment[] {
       invoiceNumber: "321321",
       notes: "Carga cheia de biscoitos recheados.",
       status: AppointmentStatus.Concluido,
+      createdBy: "Sistema (Seeding)",
       createdAt: new Date().toISOString(),
     },
     {
@@ -117,6 +121,7 @@ export function generateSeedAppointments(): Appointment[] {
       invoiceNumber: "223344",
       notes: "Entrega expressa de cookies de chocolate.",
       status: AppointmentStatus.Confirmado,
+      createdBy: "Sistema (Seeding)",
       createdAt: new Date().toISOString(),
     },
     {
@@ -135,6 +140,7 @@ export function generateSeedAppointments(): Appointment[] {
       invoiceNumber: "908070",
       notes: "Carga pesada de refrigerantes em lata para promoção.",
       status: AppointmentStatus.Aguardando,
+      createdBy: "Sistema (Seeding)",
       createdAt: new Date().toISOString(),
     },
     {
@@ -153,6 +159,7 @@ export function generateSeedAppointments(): Appointment[] {
       invoiceNumber: "404102",
       notes: "Docas frias preferencialmente.",
       status: AppointmentStatus.Cancelado,
+      createdBy: "Sistema (Seeding)",
       createdAt: new Date().toISOString(),
     },
     {
@@ -171,6 +178,7 @@ export function generateSeedAppointments(): Appointment[] {
       invoiceNumber: "776655",
       notes: "Salgadinhos de batata e milho.",
       status: AppointmentStatus.Confirmado,
+      createdBy: "Sistema (Seeding)",
       createdAt: new Date().toISOString(),
     },
   ];

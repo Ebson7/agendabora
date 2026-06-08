@@ -57,6 +57,10 @@
           "type": "string",
           "description": "Associated Invoice Number"
         },
+        "orderNumber": {
+          "type": "string",
+          "description": "Associated Order Number (Pedido)"
+        },
         "notes": {
           "type": "string",
           "description": "Cargo observation constraints"

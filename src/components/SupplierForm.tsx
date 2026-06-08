@@ -29,6 +29,8 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
   const [weight, setWeight] = useState("");
   const [invoiceNumbers, setInvoiceNumbers] = useState<string[]>([]);
   const [invoiceInput, setInvoiceInput] = useState("");
+  const [orderNumbers, setOrderNumbers] = useState<string[]>([]);
+  const [orderInput, setOrderInput] = useState("");
   const [cargoValue, setCargoValue] = useState("");
   const [notes, setNotes] = useState("");
   const [createdBy, setCreatedBy] = useState("");
@@ -56,6 +58,31 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
 
   const handleRemoveInvoice = (num: string) => {
     setInvoiceNumbers(invoiceNumbers.filter((n) => n !== num));
+  };
+
+  const handleAddOrder = () => {
+    const parts = orderInput.split(/[,;\s]+/).map(p => p.trim()).filter(Boolean);
+    if (parts.length === 0) return;
+    
+    const added = [...orderNumbers];
+    let duplicates = false;
+    parts.forEach(part => {
+      if (!added.includes(part)) {
+        added.push(part);
+      } else {
+        duplicates = true;
+      }
+    });
+    
+    setOrderNumbers(added);
+    setOrderInput("");
+    if (duplicates && parts.length === 1) {
+      alert("Este Número de Pedido já foi adicionado.");
+    }
+  };
+
+  const handleRemoveOrder = (num: string) => {
+    setOrderNumbers(orderNumbers.filter((n) => n !== num));
   };
 
   const handleCargoValueChange = (val: string) => {
@@ -229,6 +256,17 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
       });
     }
 
+    // Auto-parse any text in the current order input before submitting
+    const currentOrderList = [...orderNumbers];
+    if (orderInput.trim()) {
+      const parts = orderInput.split(/[,;\s]+/).map(p => p.trim()).filter(Boolean);
+      parts.forEach(part => {
+        if (!currentOrderList.includes(part)) {
+          currentOrderList.push(part);
+        }
+      });
+    }
+
     const newApp: Appointment = {
       id: protocolId,
       supplierName,
@@ -244,6 +282,8 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
       weight: parseFloat(weight) || 0,
       invoiceNumber: currentList.join(", ") || undefined,
       invoiceNumbers: currentList,
+      orderNumber: currentOrderList.join(", ") || undefined,
+      orderNumbers: currentOrderList,
       cargoValue: cargoValue.trim() ? parseFloat(cargoValue.replace(/\./g, "").replace(",", ".")) : undefined,
       notes: notes.trim() || undefined,
       status: AppointmentStatus.Aguardando,
@@ -268,6 +308,8 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
     setWeight("");
     setInvoiceNumbers([]);
     setInvoiceInput("");
+    setOrderNumbers([]);
+    setOrderInput("");
     setCargoValue("");
     setNotes("");
     setCreatedBy("");
@@ -278,6 +320,9 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
     const nfs = successAppointment.invoiceNumbers && successAppointment.invoiceNumbers.length > 0
       ? successAppointment.invoiceNumbers.join(", ")
       : successAppointment.invoiceNumber || "Não informado";
+    const peds = successAppointment.orderNumbers && successAppointment.orderNumbers.length > 0
+      ? successAppointment.orderNumbers.join(", ")
+      : successAppointment.orderNumber || "Não informado";
     const valorStr = successAppointment.cargoValue !== undefined
       ? successAppointment.cargoValue.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
       : "Não informado";
@@ -291,6 +336,7 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
       `Motorista: ${successAppointment.driverName || "Não informado"}\n` +
       `Placa: ${successAppointment.plate || "Não informado"}\n` +
       `NFs: ${nfs}\n` +
+      `Pedidos: ${peds}\n` +
       `Valor da Carga: ${valorStr}\n` +
       `Status: ${successAppointment.status}`
     ).then((success) => {
@@ -405,6 +451,24 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
               <div>
                 <p className="text-slate-400 text-xs print:text-slate-500">Nota Fiscal (NF)</p>
                 <p className="font-mono font-semibold">{successAppointment.invoiceNumber}</p>
+              </div>
+            ) : null}
+
+            {successAppointment.orderNumbers && successAppointment.orderNumbers.length > 0 ? (
+              <div>
+                <p className="text-slate-400 text-xs print:text-slate-500">Números do Pedido</p>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {successAppointment.orderNumbers.map(o => (
+                    <span key={o} className="bg-slate-800 text-xs font-mono font-semibold px-2 py-0.5 rounded border border-slate-700/80 text-slate-300 print:bg-slate-100 print:text-black">
+                      {o}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : successAppointment.orderNumber ? (
+              <div>
+                <p className="text-slate-400 text-xs print:text-slate-500">Número do Pedido</p>
+                <p className="font-mono font-semibold">{successAppointment.orderNumber}</p>
               </div>
             ) : null}
 
@@ -809,6 +873,60 @@ export function SupplierForm({ appointments, onAddAppointment }: SupplierFormPro
                           onClick={() => handleRemoveInvoice(num)}
                           className="hover:bg-[#2563eb]/30 rounded-full w-4 h-4 flex items-center justify-center text-[10px] text-red-400 font-bold hover:text-red-300 transition-colors"
                           title="Remover NF"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Dynamic Multiple Número de Pedido Input Section */}
+              <div className="mt-4">
+                <label className="block text-xs text-slate-400 font-medium mb-1.5">
+                  Números do Pedido <span className="text-slate-500">(Opcional - Adicione um ou mais)</span>
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Clipboard className="absolute left-3 top-2.5 w-4.5 h-4.5 text-slate-500" />
+                    <input
+                      id="order-number-input"
+                      type="text"
+                      placeholder="Digite o número do Pedido e clique em Adicionar (separe por vírgula ou espaço para mais de um)"
+                      value={orderInput}
+                      onChange={(e) => setOrderInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddOrder();
+                        }
+                      }}
+                      className="w-full bg-[#0f1419] border border-slate-700/60 focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] rounded-lg py-2 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors font-mono"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddOrder}
+                    className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1 shrink-0"
+                  >
+                    Adicionar Pedido
+                  </button>
+                </div>
+                
+                {orderNumbers.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3 p-3 bg-[#0f1419] border border-slate-800 rounded-lg">
+                    {orderNumbers.map((num) => (
+                      <span
+                        key={num}
+                        className="bg-[#2563eb]/15 border border-[#2563eb]/35 text-[#2563eb] rounded-full px-3 py-1 text-xs font-mono font-medium flex items-center gap-1.5"
+                      >
+                        {num}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveOrder(num)}
+                          className="hover:bg-[#2563eb]/30 rounded-full w-4 h-4 flex items-center justify-center text-[10px] text-red-400 font-bold hover:text-red-300 transition-colors"
+                          title="Remover Pedido"
                         >
                           ✕
                         </button>

@@ -250,6 +250,7 @@ export function ManagerDashboard({
       "Quantidade de Paletes": appt.pallets || 0,
       "Peso Estimado (kg)": appt.weight,
       "Número da NF": appt.invoiceNumber || "Não informado",
+      "Número do Pedido": appt.orderNumber || "Não informado",
       Observações: appt.notes || "",
       Status: appt.status,
       "Cadastrado Por": appt.createdBy || "Sistema",
@@ -638,9 +639,11 @@ export function ManagerDashboard({
                         </span>
                       </div>
                       <div>
-                        <span className="text-slate-500 text-[10px] block font-medium">PRODUTOR / NF</span>
-                        <p className="truncate text-slate-350">
-                          {app.productType} {app.invoiceNumber ? `(NF: ${app.invoiceNumber})` : ""}
+                        <span className="text-slate-500 text-[10px] block font-medium">PRODUTOR / NF / PEDIDO</span>
+                        <p className="truncate text-slate-350" title={`${app.productType}${app.invoiceNumber ? ` (NF: ${app.invoiceNumber})` : ""}${app.orderNumber ? ` (Ped: ${app.orderNumber})` : ""}`}>
+                          {app.productType}
+                          {app.invoiceNumber ? ` (NF: ${app.invoiceNumber})` : ""}
+                          {app.orderNumber ? ` (Ped: ${app.orderNumber})` : ""}
                         </p>
                       </div>
                       <div>
@@ -736,7 +739,9 @@ export function ManagerDashboard({
                 )}
               </div>
 
-              {((selectedApp.invoiceNumbers && selectedApp.invoiceNumbers.length > 0) || selectedApp.invoiceNumber || selectedApp.notes) && (
+              {((selectedApp.invoiceNumbers && selectedApp.invoiceNumbers.length > 0) || selectedApp.invoiceNumber ||
+                (selectedApp.orderNumbers && selectedApp.orderNumbers.length > 0) || selectedApp.orderNumber ||
+                selectedApp.notes) && (
                 <div className="p-3 bg-[#0f1419] text-xs rounded border border-slate-850 space-y-2">
                   {((selectedApp.invoiceNumbers && selectedApp.invoiceNumbers.length > 0) || selectedApp.invoiceNumber) && (
                     <div>
@@ -751,6 +756,25 @@ export function ManagerDashboard({
                         ) : (
                           <span className="bg-slate-800 text-slate-300 text-[10px] font-mono font-semibold px-2 py-0.5 rounded border border-slate-700/80">
                             {selectedApp.invoiceNumber}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {((selectedApp.orderNumbers && selectedApp.orderNumbers.length > 0) || selectedApp.orderNumber) && (
+                    <div className={((selectedApp.invoiceNumbers && selectedApp.invoiceNumbers.length > 0) || selectedApp.invoiceNumber) ? "border-t border-slate-800/85 pt-2 mt-2" : ""}>
+                      <span className="text-slate-500 block font-medium uppercase font-mono text-[10px] mb-1">Números do Pedido (Pedido)</span>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {selectedApp.orderNumbers && selectedApp.orderNumbers.length > 0 ? (
+                          selectedApp.orderNumbers.map(o => (
+                            <span key={o} className="bg-slate-800 text-slate-300 text-[10px] font-mono font-semibold px-2 py-0.5 rounded border border-slate-700/80">
+                              {o}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="bg-slate-800 text-slate-300 text-[10px] font-mono font-semibold px-2 py-0.5 rounded border border-slate-700/80">
+                            {selectedApp.orderNumber}
                           </span>
                         )}
                       </div>

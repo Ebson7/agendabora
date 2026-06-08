@@ -36,7 +36,13 @@ service cloud.firestore {
           && data.weight is number && data.weight >= 0
           && (data.status == 'AGUARDANDO CONFIRMAÇÃO' || data.status == 'CONFIRMADO' || data.status == 'EM RECEBIMENTO' || data.status == 'CONCLUÍDO' || data.status == 'CANCELADO')
           && data.createdBy is string && data.createdBy.size() <= 128
-          && data.createdAt is string;
+          && data.createdAt is string
+          && (!('invoiceNumber' in data) || data.invoiceNumber is string)
+          && (!('invoiceNumbers' in data) || data.invoiceNumbers is list)
+          && (!('orderNumber' in data) || data.orderNumber is string)
+          && (!('orderNumbers' in data) || data.orderNumbers is list)
+          && (!('cargoValue' in data) || data.cargoValue is number)
+          && (!('notes' in data) || data.notes is string);
     }
 
     // Appointment rules

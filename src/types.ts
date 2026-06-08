@@ -42,6 +42,8 @@ export interface Appointment {
   weight: number; // in kg
   invoiceNumber?: string;
   invoiceNumbers?: string[];
+  orderNumber?: string;
+  orderNumbers?: string[];
   cargoValue?: number;
   notes?: string;
   status: AppointmentStatus;

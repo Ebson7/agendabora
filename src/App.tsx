@@ -146,14 +146,21 @@ export default function App() {
     }
   };
 
-  const handleUpdateStatus = async (id: string, newStatus: AppointmentStatus) => {
+  const handleUpdateStatus = async (id: string, newStatus: AppointmentStatus, driverName?: string, plate?: string) => {
     // Save original state for possible reversion
     const originalAppointments = [...appointments];
 
     // Optimistic UI status updater 
     const updated = appointments.map((app) => {
       if (app.id === id) {
-        return { ...app, status: newStatus };
+        const u = { ...app, status: newStatus };
+        if (driverName !== undefined && driverName !== "") {
+          u.driverName = driverName;
+        }
+        if (plate !== undefined && plate !== "") {
+          u.plate = plate;
+        }
+        return u;
       }
       return app;
     });
@@ -162,7 +169,14 @@ export default function App() {
 
     try {
       const docRef = doc(db, "appointments", id);
-      await updateDoc(docRef, { status: newStatus });
+      const updates: any = { status: newStatus };
+      if (driverName !== undefined && driverName !== "") {
+        updates.driverName = driverName;
+      }
+      if (plate !== undefined && plate !== "") {
+        updates.plate = plate;
+      }
+      await updateDoc(docRef, updates);
     } catch (error) {
       console.error("Firestore update failed. Reverting status.", error);
       

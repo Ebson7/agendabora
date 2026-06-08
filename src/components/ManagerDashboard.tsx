@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import * as XLSX from "xlsx";
 import { Appointment, AppointmentStatus } from "../types";
 import { TIME_SLOTS, formatFriendlyDate, formatDayMonth } from "../utils/dateUtils";
@@ -30,7 +30,7 @@ import {
 
 interface ManagerDashboardProps {
   appointments: Appointment[];
-  onUpdateStatus: (id: string, newStatus: AppointmentStatus) => void;
+  onUpdateStatus: (id: string, newStatus: AppointmentStatus, driverName?: string, plate?: string) => void;
   onDeleteAppointment?: (id: string) => void;
   isAdmin?: boolean;
 }
@@ -60,6 +60,20 @@ export function ManagerDashboard({
 
   // Modal State for Edit/Detail
   const [selectedApp, setSelectedApp] = useState<Appointment | null>(null);
+
+  // Edit fields for Driver and Plate in the modal
+  const [driverInput, setDriverInput] = useState("");
+  const [plateInput, setPlateInput] = useState("");
+
+  useEffect(() => {
+    if (selectedApp) {
+      setDriverInput(selectedApp.driverName || "");
+      setPlateInput(selectedApp.plate || "");
+    } else {
+      setDriverInput("");
+      setPlateInput("");
+    }
+  }, [selectedApp]);
 
   // Generate 7 upcoming business days starting from today for the quick timeline selector
   const quickDaysList = useMemo(() => {
@@ -792,6 +806,38 @@ export function ManagerDashboard({
 
               {isAdmin ? (
                 <>
+                  {/* Driver and Plate Edit Fields */}
+                  <div className="p-3.5 bg-[#0f1419] rounded border border-slate-850 space-y-3">
+                    <span className="text-slate-200 block font-semibold uppercase font-mono text-[10px] flex items-center gap-1.5">
+                      🚚 Identificação do Transporte
+                    </span>
+                    <p className="text-slate-400 text-[11px] leading-relaxed">
+                      Preencha ou atualize o motorista e placa. Obrigatório/importante ao registrar <strong className="text-[#4dabf7]">EM RECEBIMENTO</strong>.
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] text-slate-500 font-bold uppercase mb-1">Nome do Motorista</label>
+                        <input
+                          type="text"
+                          value={driverInput}
+                          onChange={(e) => setDriverInput(e.target.value)}
+                          placeholder="Nome do motorista"
+                          className="w-full bg-[#1a2129] border border-slate-700/60 focus:border-[#2563eb] rounded p-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-[#2563eb]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-500 font-bold uppercase mb-1">Placa do Veículo</label>
+                        <input
+                          type="text"
+                          value={plateInput}
+                          onChange={(e) => setPlateInput(e.target.value.toUpperCase())}
+                          placeholder="Placa"
+                          className="w-full bg-[#1a2129] border border-slate-700/60 focus:border-[#2563eb] rounded p-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-[#2563eb] font-mono"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="p-3 bg-amber-500/10 border-l-3 border-amber-500 text-[11px] text-amber-300 leading-relaxed rounded-r">
                     <p className="font-semibold mb-0.5">Controle de Lotação Doca Boracéia:</p>
                     Lembre-se que cada slot de 1 hora suporta no máximo 2 veículos. Salvar uma carga como AGUARDANDO ou CONFIRMADO ocupa a vaga no slot selecionado.
@@ -815,7 +861,11 @@ export function ManagerDashboard({
                           <button
                             key={elem.status}
                             onClick={() => {
-                              onUpdateStatus(selectedApp.id, elem.status);
+                              if ((elem.status === AppointmentStatus.EmRecebimento || elem.status === AppointmentStatus.Concluido) && (!driverInput.trim() || !plateInput.trim())) {
+                                alert("⚠️ Operação Recusada!\n\nPara atualizar o status para EM RECEBIMENTO ou CONCLUÍDO, é obrigatório preencher o Nome do Motorista e a Placa do Veículo.");
+                                return;
+                              }
+                              onUpdateStatus(selectedApp.id, elem.status, driverInput.trim(), plateInput.trim());
                               setSelectedApp(null);
                             }}
                             className={`w-full text-left py-2 px-3 border rounded text-xs transition flex items-center justify-between cursor-pointer ${elem.color} ${

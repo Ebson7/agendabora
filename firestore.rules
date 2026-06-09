@@ -26,7 +26,7 @@ service cloud.firestore {
           && data.supplierName is string && data.supplierName.size() <= 128
           && data.cnpj is string && data.cnpj.size() <= 20
           && data.driverName is string && data.driverName.size() <= 128
-          && data.plate is string && data.plate.size() <= 12
+          && data.plate is string && data.plate.size() <= 32
           && data.vehicleType is string && data.vehicleType.size() <= 20
           && data.date is string && data.date.size() == 10
           && data.timeSlot is string && data.timeSlot.size() <= 30

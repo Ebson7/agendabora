@@ -9,7 +9,7 @@ service cloud.firestore {
 
     // Helper utilities
     function isValidId(id) {
-      return id is string && id.size() <= 64 && id.matches('^[a-zA-Z0-9_\\-]+$');
+      return id is string && id.size() <= 64 && id.matches('^[a-zA-Z0-9_-]+$');
     }
 
     function incoming() {
@@ -25,24 +25,24 @@ service cloud.firestore {
       return data.id is string && data.id.size() <= 32
           && data.supplierName is string && data.supplierName.size() <= 128
           && data.cnpj is string && data.cnpj.size() <= 20
-          && data.driverName is string && data.driverName.size() <= 128
-          && data.plate is string && data.plate.size() <= 32
+          && (!('driverName' in data) || data.driverName == null || (data.driverName is string && data.driverName.size() <= 128))
+          && (!('plate' in data) || data.plate == null || (data.plate is string && data.plate.size() <= 32))
           && data.vehicleType is string && data.vehicleType.size() <= 20
           && data.date is string && data.date.size() == 10
           && data.timeSlot is string && data.timeSlot.size() <= 30
           && data.productType is string && data.productType.size() <= 30
-          && data.volume is int && data.volume >= 0
-          && data.pallets is int && data.pallets >= 0
+          && data.volume is number && data.volume >= 0
+          && data.pallets is number && data.pallets >= 0
           && data.weight is number && data.weight >= 0
           && (data.status == 'AGUARDANDO CONFIRMAÇÃO' || data.status == 'CONFIRMADO' || data.status == 'EM RECEBIMENTO' || data.status == 'CONCLUÍDO' || data.status == 'CANCELADO')
           && data.createdBy is string && data.createdBy.size() <= 128
           && data.createdAt is string
-          && (!('invoiceNumber' in data) || data.invoiceNumber is string)
-          && (!('invoiceNumbers' in data) || data.invoiceNumbers is list)
-          && (!('orderNumber' in data) || data.orderNumber is string)
-          && (!('orderNumbers' in data) || data.orderNumbers is list)
-          && (!('cargoValue' in data) || data.cargoValue is number)
-          && (!('notes' in data) || data.notes is string);
+          && (!('invoiceNumber' in data) || data.invoiceNumber == null || data.invoiceNumber is string)
+          && (!('invoiceNumbers' in data) || data.invoiceNumbers == null || data.invoiceNumbers is list)
+          && (!('orderNumber' in data) || data.orderNumber == null || data.orderNumber is string)
+          && (!('orderNumbers' in data) || data.orderNumbers == null || data.orderNumbers is list)
+          && (!('cargoValue' in data) || data.cargoValue == null || data.cargoValue is number)
+          && (!('notes' in data) || data.notes == null || data.notes is string);
     }
 
     // Appointment rules

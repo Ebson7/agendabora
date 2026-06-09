@@ -698,8 +698,8 @@ export function ManagerDashboard({
       {/* 4. Overlay Pop up Edit Modal for managing booking parameters */}
       {selectedApp && (
         <div className="fixed inset-0 bg-[#000000]/80 flex items-center justify-center p-4 z-50 animate-fade-in block">
-          <div className="bg-[#1a2129] border border-slate-700/80 rounded-xl max-w-lg w-full overflow-hidden shadow-2xl">
-            <div className="bg-[#0f1419] p-4 border-b border-slate-850 flex items-center justify-between">
+          <div className="bg-[#1a2129] border border-slate-700/80 rounded-xl max-w-lg w-full flex flex-col max-h-[92vh] overflow-hidden shadow-2xl animate-scale-up">
+            <div className="bg-[#0f1419] p-4 border-b border-slate-850 flex items-center justify-between shrink-0">
               <div>
                 <span className="text-[10px] text-slate-500 font-mono tracking-wider block">
                   {isAdmin ? "ALTERAR STATUS DE CARGA" : "DETALHES DO AGENDAMENTO"}
@@ -714,7 +714,7 @@ export function ManagerDashboard({
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 overflow-y-auto flex-1">
               <div className="text-sm">
                 <span className="text-slate-500 text-xs block">Fornecedor / Emitente</span>
                 <p className="font-bold text-white text-base">{selectedApp.supplierName}</p>
@@ -922,7 +922,7 @@ export function ManagerDashboard({
               )}
             </div>
 
-            <div className="bg-[#0f1419] py-3.5 px-6 border-t border-slate-850 flex justify-between items-center">
+            <div className="bg-[#0f1419] py-3.5 px-6 border-t border-slate-850 flex justify-between items-center shrink-0">
               {isAdmin && onDeleteAppointment ? (
                 <button
                   type="button"
